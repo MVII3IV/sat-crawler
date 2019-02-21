@@ -19,7 +19,7 @@ public class CrawlerController {
         this.browser = browser;
     }
 
-    @RequestMapping(value = "/getEmittedBills", method = RequestMethod.GET)
+    @RequestMapping(value = "/extract/emitted", method = RequestMethod.GET)
     public String getEmittedBills() throws IOException {
         browser.login();
         return "hello";

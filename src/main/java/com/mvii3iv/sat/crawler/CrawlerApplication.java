@@ -1,5 +1,6 @@
 package com.mvii3iv.sat.crawler;
 
+import com.mvii3iv.sat.crawler.components.browser.Browser;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

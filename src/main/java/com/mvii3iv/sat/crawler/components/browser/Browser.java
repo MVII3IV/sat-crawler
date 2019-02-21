@@ -17,64 +17,103 @@ import java.util.logging.Level;
 @Component
 public class Browser {
 
-    /*
-        RFC LULR860821MTA
-        PAS goluna21
-
-        CASA8412202SA         17201720               Alberto
-        PACY920531TS9         ab45ac56               Yara
-        OIGO510728N20         ab45ac56               Olga
-        GORA870926A8A         13081308               Alexandra
+     /*
+        LULR860821MTA   goluna21
+        CASA8412202SA   17201720    Alberto
+        PACY920531TS9   ab45ac56    Yara
+        OIGO510728N20   ab45ac56    Olga
+        GORA870926A8A   13081308    Alexandra
      */
+
+    @Autowired
+    private Environment env;
 
     private static final String LOGIN_URL = "https://portalcfdi.facturaelectronica.sat.gob.mx/";
     private AntiCaptchaService antiCaptchaService;
     private CaptchaService captchaService;
 
-    @Autowired
-    private Environment env;
-
+    /**
+     *
+     * @param antiCaptchaService
+     * @param captchaService
+     * @param env
+     */
     public Browser(AntiCaptchaService antiCaptchaService, CaptchaService captchaService, Environment env) {
         this.antiCaptchaService = antiCaptchaService;
         this.captchaService = captchaService;
         this.env = env;
     }
 
-    public void login() throws IOException {
+    public WebClient login() {
 
-            WebClient webClient = init();
-            HtmlPage browser = webClient.getPage(LOGIN_URL);
-            System.out.println();
+        //login variables
+        int timeMultiplier = 1;
+        WebClient webClient = init();
+        HtmlPage browser = null;
+        HtmlImage image = null;
+        //login variables end
 
-            HtmlImage image = browser.<HtmlImage>getFirstByXPath("//*[@id='IDPLogin']/div[3]/label/img");
 
+        do {
+            if(timeMultiplier != 1)
+                System.out.println("--->login form could be found, try:" + timeMultiplier);
+
+            try {
+                browser = webClient.getPage(LOGIN_URL);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            image = browser.<HtmlImage>getFirstByXPath("//*[@id='IDPLogin']/div[3]/label/img");
+            webClient.waitForBackgroundJavaScript(1000 * ++timeMultiplier);
             captchaService.saveCaptcha(image, "LULR860821MTA");
-
-
             browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
 
-            int timeMultiplier = 2;
+            if(timeMultiplier > 5){
+                System.out.println("--->login form could be found after " + timeMultiplier + " tries");
+                return null;
+            }
+        } while (!browser.getTitleText().toLowerCase().equals("sat autenticación"));
+        timeMultiplier = 1;
 
 
-            HtmlForm loginForm = browser.getFormByName("IDPLogin");
-            HtmlInput rfc = loginForm.getInputByName("Ecom_User_ID");
-            HtmlPasswordInput pass = loginForm.getInputByName("Ecom_Password");
-            HtmlInput captcha = loginForm.getInputByName("jcaptcha");
-            HtmlInput sendButton = loginForm.getInputByName("submit");
+        //--->begin login form
+        do{
+            try {
+                HtmlForm loginForm = browser.getFormByName("IDPLogin");
+                HtmlInput rfc = loginForm.getInputByName("Ecom_User_ID");
+                HtmlPasswordInput pass = loginForm.getInputByName("Ecom_Password");
+                HtmlInput captcha = loginForm.getInputByName("jcaptcha");
+                HtmlInput sendButton = loginForm.getInputByName("submit");
+                rfc.setValueAttribute("LULR860821MTA");
+                pass.setValueAttribute("goluna21");
+                captcha.setValueAttribute(captchaService.decodeCaptcha("LULR860821MTA"));
+                browser = sendButton.click();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if(timeMultiplier > 5){
+                System.out.println("--->login form couldn't be sent after " + timeMultiplier + " tries");
+                return null;
+            }
+        } while (!browser.getTitleText().toLowerCase().equals("portal contribuyentes cfdi | buscar cfdi"));
+        //--->end login form
 
 
-            rfc.setValueAttribute("LULR860821MTA");
-            pass.setValueAttribute("goluna21");
-            captcha.setValueAttribute(captchaService.decodeCaptcha("LULR860821MTA"));
-            browser = sendButton.click();
 
 
-            do {
-                browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/");
-                webClient.waitForBackgroundJavaScript(1000 * timeMultiplier++);
-            } while (browser.getPage().getTitleText().toLowerCase().equals("sat autenticación"));
 
-
+        //--->login validator
+        do {
+            try {
+                browser = webClient.getPage(LOGIN_URL);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            webClient.waitForBackgroundJavaScript(1000 * timeMultiplier++);
+        } while (browser.getPage().getTitleText().toLowerCase().equals("sat autenticación"));
+        //--->end login validator
+        return webClient;
     }
 
     private WebClient init() {
