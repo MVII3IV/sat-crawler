@@ -46,13 +46,28 @@ public class Browser {
 
     public WebClient login() {
 
-        //login variables
-        int timeMultiplier = 1;
         WebClient webClient = init();
+
+        webClient = openLoginURL(webClient);
+        webClient = sendLoginForm(webClient);
+        webClient = getMainPage(webClient);
+
+        return webClient;
+    }
+
+
+
+
+    /**
+     *
+     * @param webClient
+     * @return
+     */
+    private WebClient openLoginURL(WebClient webClient){
+
+        int timeMultiplier = 1;
         HtmlPage browser = null;
         HtmlImage image = null;
-        //login variables end
-
 
         do {
             if(timeMultiplier != 1)
@@ -74,9 +89,21 @@ public class Browser {
                 return null;
             }
         } while (!browser.getTitleText().toLowerCase().equals("sat autenticación"));
-        timeMultiplier = 1;
+
+        return webClient;
+    }
 
 
+
+
+    /**
+     *
+     * @param webClient
+     * @return
+     */
+    private WebClient sendLoginForm(WebClient webClient) {
+        int timeMultiplier = 1;
+        HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
         //--->begin login form
         do{
             try {
@@ -98,11 +125,18 @@ public class Browser {
             }
         } while (!browser.getTitleText().toLowerCase().equals("portal contribuyentes cfdi | buscar cfdi"));
         //--->end login form
+        return webClient;
+    }
 
 
-
-
-
+    /**
+     *
+     * @param webClient
+     * @return
+     */
+    private WebClient getMainPage(WebClient webClient) {
+        int timeMultiplier = 1;
+        HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
         //--->login validator
         do {
             try {
