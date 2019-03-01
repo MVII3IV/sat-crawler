@@ -76,6 +76,12 @@ public class Browser {
             do {
                 webClient.waitForBackgroundJavaScript(1000);
                 table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
+
+
+                if(browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")){
+                    System.out.println("no info available for that user");
+                    return null;
+                }
             } while (table.getRows().size() <= 1);
 
             boolean firstTimeFlag = true;
@@ -151,8 +157,7 @@ public class Browser {
 
         WebClient webClient = init();
 
-        webClient = openLoginURL(webClient, rfc);
-        webClient = sendLoginForm(webClient, rfc, pass);
+        webClient = openLoginURL(webClient, rfc, pass);
         webClient = getMainPage(webClient);
 
         return webClient;
@@ -165,7 +170,7 @@ public class Browser {
      * @param webClient
      * @return
      */
-    private WebClient openLoginURL(WebClient webClient, String rfc){
+    private WebClient openLoginURL(WebClient webClient, String RFC, String PASS){
 
         int timeMultiplier = 1;
         HtmlPage browser = null;
@@ -177,20 +182,40 @@ public class Browser {
 
             try {
                 browser = webClient.getPage(LOGIN_URL);
+
+                image = browser.<HtmlImage>getFirstByXPath("//*[@id='IDPLogin']/div[3]/label/img");
+                webClient.waitForBackgroundJavaScript(1000 * ++timeMultiplier);
+                captchaService.saveCaptcha(image, RFC);
+                browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
+
+                HtmlForm loginForm = browser.getFormByName("IDPLogin");
+                HtmlInput rfc = loginForm.getInputByName("Ecom_User_ID");
+                HtmlPasswordInput pass = loginForm.getInputByName("Ecom_Password");
+                HtmlInput captcha = loginForm.getInputByName("jcaptcha");
+                HtmlInput sendButton = loginForm.getInputByName("submit");
+                rfc.setValueAttribute(RFC);
+                pass.setValueAttribute(PASS);
+                captcha.setValueAttribute(captchaService.decodeCaptcha(RFC));
+
+                try{
+                    browser = sendButton.click();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            image = browser.<HtmlImage>getFirstByXPath("//*[@id='IDPLogin']/div[3]/label/img");
-            webClient.waitForBackgroundJavaScript(1000 * ++timeMultiplier);
-            captchaService.saveCaptcha(image, rfc);
-            browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
+
 
             if(timeMultiplier > 5){
                 System.out.println("--->login form could be found after " + timeMultiplier + " tries");
                 return null;
             }
-        } while (!browser.getTitleText().toLowerCase().equals("sat autenticación"));
+        } while (!browser.getTitleText().toLowerCase().equals("portal contribuyentes cfdi | buscar cfdi"));
 
         return webClient;
     }
@@ -218,6 +243,7 @@ public class Browser {
                 pass.setValueAttribute(PASS);
                 captcha.setValueAttribute(captchaService.decodeCaptcha(RFC));
                 browser = sendButton.click();
+                System.out.println();
             } catch (IOException e) {
                 e.printStackTrace();
             }
