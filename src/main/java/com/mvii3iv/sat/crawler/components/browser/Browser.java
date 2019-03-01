@@ -53,17 +53,58 @@ public class Browser {
 
 
     public WebClient getUserData(WebClient webClient){
-        getEmittedBills(webClient);
+        //getEmittedBills(webClient);
         getReceivedBills(webClient);
         return null;
     }
 
     public WebClient getReceivedBills(WebClient webClient){
+        HtmlTable table = null;
+        boolean firstTimeFlag = true;
+        String transformedDate = "Fecha de Emisión";
+
         try {
             HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
             browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaReceptor.aspx");
+            browser.getHtmlElementById("ctl00_MainContent_RdoFechas").click();
+
+            ((HtmlSelect)browser.getHtmlElementById("DdlAnio")).setDefaultValue("2019");
+            ((HtmlSelect)browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlMes")).setDefaultValue("01");
+            ((HtmlSelect)browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlDia")).setDefaultValue("02");
+            browser = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_BtnBusqueda")).click();
+
+
+            do {
+                webClient.waitForBackgroundJavaScript(1000);
+                table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
+
+
+                if(browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")){
+                    System.out.println("no info available for that user");
+                    return null;
+                }
+            } while (table.getRows().size() <= 1);
+
+            for (final HtmlTableRow row : table.getRows()) {
+
+                if (!firstTimeFlag) {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                    Date date = null;
+                    date = simpleDateFormat.parse(row.getCells().get(6).asText());
+                    SimpleDateFormat simpleDateFormatAux = new SimpleDateFormat("dd/MM/yyyy");
+                    transformedDate = simpleDateFormatAux.format(date);
+                }
+                firstTimeFlag = false;
+
+                for(HtmlTableCell data : row.getCells()){
+                    System.out.print(data.asText() + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" );
+                }
+                System.out.println();
+            }
 
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         return webClient;
@@ -75,7 +116,6 @@ public class Browser {
         try {
             HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
             browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaEmisor.aspx");
-            //browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaReceptor.aspx");
 
             //setup date range
             browser.getHtmlElementById("ctl00_MainContent_RdoFechas").click();
@@ -110,7 +150,7 @@ public class Browser {
                 firstTimeFlag = false;
 
                 for(HtmlTableCell data : row.getCells()){
-                    System.out.print(data.asText() + "\t" );
+                    System.out.print(data.asText() + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" );
                 }
                 System.out.println();
             }
