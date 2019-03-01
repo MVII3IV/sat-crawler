@@ -54,9 +54,20 @@ public class Browser {
 
     public WebClient getUserData(WebClient webClient){
         getEmittedBills(webClient);
+        getReceivedBills(webClient);
         return null;
     }
 
+    public WebClient getReceivedBills(WebClient webClient){
+        try {
+            HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
+            browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaReceptor.aspx");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return webClient;
+    }
 
     public WebClient getEmittedBills(WebClient webClient){
 
@@ -145,12 +156,6 @@ public class Browser {
             );*/
         return webClient;
     }
-
-
-    public WebClient getReceivedBills(WebClient webClient){
-        return null;
-    }
-
 
 
     public WebClient login(String rfc, String pass) {
