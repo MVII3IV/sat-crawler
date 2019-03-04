@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,15 +32,13 @@ public class Browser {
         GORA870926A8A   13081308    Alexandra
      */
 
+    private static final String LOGIN_URL = "https://portalcfdi.facturaelectronica.sat.gob.mx/";
     @Autowired
     private Environment env;
-
-    private static final String LOGIN_URL = "https://portalcfdi.facturaelectronica.sat.gob.mx/";
     private AntiCaptchaService antiCaptchaService;
     private CaptchaService captchaService;
 
     /**
-     *
      * @param antiCaptchaService
      * @param captchaService
      * @param env
@@ -51,56 +50,87 @@ public class Browser {
     }
 
 
-
-    public WebClient getUserData(WebClient webClient){
+    public WebClient getUserData(WebClient webClient) {
         //getEmittedBills(webClient);
         getReceivedBills(webClient);
         return null;
     }
 
-    public WebClient getReceivedBills(WebClient webClient){
+    public WebClient getReceivedBills(WebClient webClient) {
         HtmlTable table = null;
-        boolean firstTimeFlag = true;
+
         String transformedDate = "Fecha de Emisión";
+        String month = "01";
+        String day = "01";
 
         try {
             HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
             browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaReceptor.aspx");
             browser.getHtmlElementById("ctl00_MainContent_RdoFechas").click();
 
-            ((HtmlSelect)browser.getHtmlElementById("DdlAnio")).setDefaultValue("2019");
-            ((HtmlSelect)browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlMes")).setDefaultValue("01");
-            ((HtmlSelect)browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlDia")).setDefaultValue("02");
-            browser = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_BtnBusqueda")).click();
+            ((HtmlSelect) browser.getHtmlElementById("DdlAnio")).setDefaultValue("2019");
 
 
-            do {
-                webClient.waitForBackgroundJavaScript(1000);
-                table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
+            for (int i = 1; i < 13; i++) {
+
+                if (i < 10)
+                    month = "0" + i;
 
 
-                if(browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")){
-                    System.out.println("no info available for that user");
-                    return null;
+                for (int j = 1; j < 32; j++) {
+                    if (j < 10)
+                        day = "0" + j;
+                    else
+                        day = "" + j;
+                    int count = 0;
+
+                    System.out.println(day + "-" + month + "-2019");
+                    ((HtmlSelect) browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlMes")).setSelectedAttribute(month,true);
+                    ((HtmlSelect) browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlDia")).setSelectedAttribute(day, true);
+                    browser = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_BtnBusqueda")).click();
+
+
+                    do {
+                        System.out.println("try number: " + count++);
+                        webClient.waitForBackgroundJavaScript(1000);
+                        table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
+
+
+                        if (browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")) {
+                            System.out.println("no info available for that user");
+                            break;
+                        }
+
+                        if (count > 6)
+                            break;
+                    } while (table.getRows().size() <= 1);
+
+                    if (table.getRows().size() <= 1)
+                        continue;
+
+                    boolean firstTimeFlag = true;
+
+                    for (final HtmlTableRow row : table.getRows()) {
+
+                        if (!firstTimeFlag) {
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                            Date date = null;
+                            date = simpleDateFormat.parse(row.getCells().get(6).asText());
+                            SimpleDateFormat simpleDateFormatAux = new SimpleDateFormat("dd/MM/yyyy");
+                            transformedDate = simpleDateFormatAux.format(date);
+                        }
+                        firstTimeFlag = false;
+
+                        for (HtmlTableCell data : row.getCells()) {
+                            System.out.print(data.asText() + "\t\t\t");
+                        }
+                        System.out.println();
+                    }
+
                 }
-            } while (table.getRows().size() <= 1);
 
-            for (final HtmlTableRow row : table.getRows()) {
-
-                if (!firstTimeFlag) {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-                    Date date = null;
-                    date = simpleDateFormat.parse(row.getCells().get(6).asText());
-                    SimpleDateFormat simpleDateFormatAux = new SimpleDateFormat("dd/MM/yyyy");
-                    transformedDate = simpleDateFormatAux.format(date);
-                }
-                firstTimeFlag = false;
-
-                for(HtmlTableCell data : row.getCells()){
-                    System.out.print(data.asText() + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" );
-                }
-                System.out.println();
             }
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,7 +140,7 @@ public class Browser {
         return webClient;
     }
 
-    public WebClient getEmittedBills(WebClient webClient){
+    public WebClient getEmittedBills(WebClient webClient) {
 
         HtmlTable table = null;
         try {
@@ -129,7 +159,7 @@ public class Browser {
                 table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
 
 
-                if(browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")){
+                if (browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")) {
                     System.out.println("no info available for that user");
                     return null;
                 }
@@ -149,17 +179,16 @@ public class Browser {
                 }
                 firstTimeFlag = false;
 
-                for(HtmlTableCell data : row.getCells()){
-                    System.out.print(data.asText() + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" );
+                for (HtmlTableCell data : row.getCells()) {
+                    System.out.print(data.asText() + "\t\t\t");
                 }
                 System.out.println();
             }
 
 
-
         } catch (IOException e) {
             e.printStackTrace();
-        }catch (ParseException e) {
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         /*
@@ -209,20 +238,18 @@ public class Browser {
     }
 
 
-
     /**
-     *
      * @param webClient
      * @return
      */
-    private WebClient openLoginURL(WebClient webClient, String RFC, String PASS){
+    private WebClient openLoginURL(WebClient webClient, String RFC, String PASS) {
 
         int timeMultiplier = 1;
         HtmlPage browser = null;
         HtmlImage image = null;
 
         do {
-            if(timeMultiplier != 1)
+            if (timeMultiplier != 1)
                 System.out.println("--->login form could be found, try:" + timeMultiplier);
 
             try {
@@ -242,7 +269,7 @@ public class Browser {
                 pass.setValueAttribute(PASS);
                 captcha.setValueAttribute(captchaService.decodeCaptcha(RFC));
 
-                try{
+                try {
                     browser = sendButton.click();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -255,8 +282,7 @@ public class Browser {
             }
 
 
-
-            if(timeMultiplier > 5){
+            if (timeMultiplier > 5) {
                 System.out.println("--->login form could be found after " + timeMultiplier + " tries");
                 return null;
             }
@@ -267,7 +293,6 @@ public class Browser {
 
 
     /**
-     *
      * @param webClient
      * @param RFC
      * @param PASS
@@ -277,7 +302,7 @@ public class Browser {
         int timeMultiplier = 1;
         HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
         //--->begin login form
-        do{
+        do {
             try {
                 HtmlForm loginForm = browser.getFormByName("IDPLogin");
                 HtmlInput rfc = loginForm.getInputByName("Ecom_User_ID");
@@ -292,7 +317,7 @@ public class Browser {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if(timeMultiplier > 5){
+            if (timeMultiplier > 5) {
                 System.out.println("--->login form couldn't be sent after " + timeMultiplier + " tries");
                 return null;
             }
@@ -302,9 +327,7 @@ public class Browser {
     }
 
 
-
     /**
-     *
      * @param webClient
      * @return
      */
@@ -323,7 +346,6 @@ public class Browser {
         //--->end login validator
         return webClient;
     }
-
 
 
     private WebClient init() {
