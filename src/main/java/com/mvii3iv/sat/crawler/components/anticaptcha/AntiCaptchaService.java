@@ -36,6 +36,11 @@ public class AntiCaptchaService {
     public String decode(byte[] captcha) {
 
         AntiCaptchaCreatedTaskResponse taskResponse = createTask(captcha);
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         AntiCaptchaTaskResult result = getTaskResult(taskResponse.getTaskId());
         String resolvedCaptcha = result.getSolution().getText();
 
@@ -105,7 +110,8 @@ public class AntiCaptchaService {
             } else {
                 conn = (HttpURLConnection) url.openConnection();
             }
-
+            conn.setConnectTimeout(60000);
+            conn.setReadTimeout(60000);
             conn.setDoOutput(true);
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
