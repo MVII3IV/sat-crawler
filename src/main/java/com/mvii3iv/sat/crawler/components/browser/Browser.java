@@ -76,23 +76,34 @@ public class Browser {
                 if (i < 10)
                     month = "0" + i;
 
-
+                /*
                 for (int j = 1; j < 32; j++) {
                     if (j < 10)
                         day = "0" + j;
                     else
                         day = "" + j;
+                        */
                     int count = 0;
 
                     System.out.println(day + "-" + month + "-2019");
-                    ((HtmlSelect) browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlMes")).setSelectedAttribute(month,true);
-                    ((HtmlSelect) browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlDia")).setSelectedAttribute(day, true);
+
+
+                    HtmlSelect monthSelect = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFecha_DdlMes");
+                    HtmlOption option = monthSelect.getOptionByText(month);
+                    monthSelect.setSelectedAttribute(option, true);
+
+                    HtmlSelect daySelect = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFecha_DdlDia");
+                    //option = monthSelect.getOptionByText("");
+                    monthSelect.setSelectedAttribute("", true);
+
+                    //((HtmlInput ) browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlMes")).setValueAttribute(month);
+                    //((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlDia")).setValueAttribute("");
                     browser = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_BtnBusqueda")).click();
 
 
                     do {
                         System.out.println("try number: " + count++);
-                        webClient.waitForBackgroundJavaScript(1000);
+                        webClient.waitForBackgroundJavaScript(1000 * count);
                         table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
 
 
@@ -111,7 +122,7 @@ public class Browser {
                     boolean firstTimeFlag = true;
 
                     for (final HtmlTableRow row : table.getRows()) {
-
+                        System.out.println("table rows: " + table.getRowCount());
                         if (!firstTimeFlag) {
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                             Date date = null;
@@ -129,7 +140,7 @@ public class Browser {
 
                 }
 
-            }
+            //}
 
 
         } catch (IOException e) {

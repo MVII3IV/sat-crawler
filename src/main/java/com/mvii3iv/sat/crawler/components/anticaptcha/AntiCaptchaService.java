@@ -36,11 +36,11 @@ public class AntiCaptchaService {
     public String decode(byte[] captcha) {
 
         AntiCaptchaCreatedTaskResponse taskResponse = createTask(captcha);
-        try {
-            Thread.sleep(60000);
+        /*try {
+            Thread.sleep(35000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
         AntiCaptchaTaskResult result = getTaskResult(taskResponse.getTaskId());
         String resolvedCaptcha = result.getSolution().getText();
 
