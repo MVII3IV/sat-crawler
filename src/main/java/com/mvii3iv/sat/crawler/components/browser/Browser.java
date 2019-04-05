@@ -17,6 +17,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -51,7 +52,7 @@ public class Browser {
 
 
     public WebClient getUserData(WebClient webClient) {
-        //getEmittedBills(webClient);
+        getEmittedBills(webClient);
         getReceivedBills(webClient);
         return null;
     }
@@ -68,21 +69,12 @@ public class Browser {
             browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaReceptor.aspx");
             browser.getHtmlElementById("ctl00_MainContent_RdoFechas").click();
 
-            //((HtmlSelect) browser.getHtmlElementById("DdlAnio")).setDefaultValue("2019");
 
 
-            for (int i = 1; i < 13; i++) {
+            for (int i = 1; i < (Calendar.getInstance().get(Calendar.MONTH) + 2) + 1; i++) {
 
                 if (i < 10)
                     month = "0" + i;
-
-                /*
-                for (int j = 1; j < 32; j++) {
-                    if (j < 10)
-                        day = "0" + j;
-                    else
-                        day = "" + j;
-                        */
                     int count = 0;
 
                     System.out.println(day + "-" + month + "-2019");
@@ -91,14 +83,8 @@ public class Browser {
                     HtmlSelect monthSelect = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFecha_DdlMes");
                     HtmlOption option = monthSelect.getOptionByText(month);
                     monthSelect.setSelectedAttribute(option, true);
-
-                    //HtmlSelect daySelect = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFecha_DdlDia");
-                    //option = monthSelect.getOptionByText("");
-                    //monthSelect.setSelectedAttribute("", true);
-
-                    //((HtmlInput ) browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlMes")).setValueAttribute(month);
-                    //((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlDia")).setValueAttribute("");
                     browser = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_BtnBusqueda")).click();
+
 
 
                     do {
@@ -139,8 +125,6 @@ public class Browser {
                     }
 
                 }
-
-            //}
 
 
         } catch (IOException e) {
