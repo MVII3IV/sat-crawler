@@ -68,7 +68,7 @@ public class Browser {
             browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaReceptor.aspx");
             browser.getHtmlElementById("ctl00_MainContent_RdoFechas").click();
 
-            ((HtmlSelect) browser.getHtmlElementById("DdlAnio")).setDefaultValue("2019");
+            //((HtmlSelect) browser.getHtmlElementById("DdlAnio")).setDefaultValue("2019");
 
 
             for (int i = 1; i < 13; i++) {
@@ -92,9 +92,9 @@ public class Browser {
                     HtmlOption option = monthSelect.getOptionByText(month);
                     monthSelect.setSelectedAttribute(option, true);
 
-                    HtmlSelect daySelect = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFecha_DdlDia");
+                    //HtmlSelect daySelect = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFecha_DdlDia");
                     //option = monthSelect.getOptionByText("");
-                    monthSelect.setSelectedAttribute("", true);
+                    //monthSelect.setSelectedAttribute("", true);
 
                     //((HtmlInput ) browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlMes")).setValueAttribute(month);
                     //((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFecha_DdlDia")).setValueAttribute("");
