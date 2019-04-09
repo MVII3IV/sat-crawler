@@ -5,6 +5,8 @@ import com.mvii3iv.sat.crawler.components.captcha.*;
 import com.gargoylesoftware.htmlunit.*;
 import com.gargoylesoftware.htmlunit.html.*;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
+import com.mvii3iv.sat.crawler.components.incomes.Incomes;
+import com.mvii3iv.sat.crawler.components.incomes.IncomesRepository;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -38,24 +40,28 @@ public class Browser {
     private Environment env;
     private AntiCaptchaService antiCaptchaService;
     private CaptchaService captchaService;
+    @Autowired
+    private IncomesRepository incomesRepository;
 
     /**
      * @param antiCaptchaService
      * @param captchaService
      * @param env
      */
-    public Browser(AntiCaptchaService antiCaptchaService, CaptchaService captchaService, Environment env) {
+    public Browser(AntiCaptchaService antiCaptchaService, CaptchaService captchaService, Environment env, IncomesRepository incomesRepository) {
         this.antiCaptchaService = antiCaptchaService;
         this.captchaService = captchaService;
         this.env = env;
+        this.incomesRepository = incomesRepository;
     }
 
 
     public WebClient getUserData(WebClient webClient) {
-        getEmittedBills(webClient);
+        //getEmittedBills(webClient);
         getReceivedBills(webClient);
         return null;
     }
+
 
     public WebClient getReceivedBills(WebClient webClient) {
         HtmlTable table = null;
@@ -63,6 +69,7 @@ public class Browser {
         String transformedDate = "Fecha de Emisión";
         String month = "01";
         String day = "01";
+        List incomes = new ArrayList<Incomes>();
 
         try {
             HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
@@ -118,26 +125,46 @@ public class Browser {
                         }
                         firstTimeFlag = false;
 
-                        for (HtmlTableCell data : row.getCells()) {
-                            System.out.print(data.asText() + "\t\t\t");
-                        }
-                        System.out.println();
+
+                            incomes.add(
+                                    new Incomes(
+                                            row.getCells().get(1).asText(),  //fiscalId
+                                            row.getCells().get(2).asText(),  //emisorRFC
+                                            row.getCells().get(3).asText(),  //emisorName
+                                            row.getCells().get(4).asText(),  //receiverRFC
+                                            row.getCells().get(5).asText(),  //receiverName
+                                            transformedDate,                 //emitedDate
+                                            row.getCells().get(7).asText(),  //certificationDate
+                                            row.getCells().get(8).asText(),  //certifiedPAC
+                                            row.getCells().get(9).asText(),  //total
+                                            row.getCells().get(10).asText(), //Efecto del Comprobante
+                                            row.getCells().get(11).asText(), //Estatus de cancelación
+                                            row.getCells().get(12).asText(), //Estado del Comprobante
+                                            row.getCells().get(13).asText(), //Estatus de Proceso de Cancelación
+                                            row.getCells().get(14).asText(), //Fecha de Proceso de Cancelación
+                                            false                     //emited
+                                    )
+                            );
+
+
                     }
 
                 }
-
 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        incomesRepository.save(incomes);
         return webClient;
     }
 
+    
     public WebClient getEmittedBills(WebClient webClient) {
 
         HtmlTable table = null;
+        List incomes = new ArrayList<Incomes>();
         try {
             HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
             browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaEmisor.aspx");
@@ -174,11 +201,27 @@ public class Browser {
                 }
                 firstTimeFlag = false;
 
-                for (HtmlTableCell data : row.getCells()) {
-                    System.out.print(data.asText() + "\t\t\t");
-                }
-                System.out.println();
+                    incomes.add(
+                            new Incomes(
+                                    row.getCells().get(1).asText(),  //fiscalId
+                                    row.getCells().get(2).asText(),  //emisorRFC
+                                    row.getCells().get(3).asText(),  //emisorName
+                                    row.getCells().get(4).asText(),  //receiverRFC
+                                    row.getCells().get(5).asText(),  //receiverName
+                                    transformedDate,                 //emitedDate
+                                    row.getCells().get(7).asText(),  //certificationDate
+                                    row.getCells().get(8).asText(),  //certifiedPAC
+                                    row.getCells().get(9).asText(),  //total
+                                    row.getCells().get(10).asText(), //Efecto del Comprobante
+                                    row.getCells().get(11).asText(), //Estatus de cancelación
+                                    row.getCells().get(12).asText(), //Estado del Comprobante
+                                    row.getCells().get(13).asText(), //Estatus de Proceso de Cancelación
+                                    row.getCells().get(14).asText(), //Fecha de Proceso de Cancelación
+                                    true
+                            )
+                    );
             }
+
 
 
         } catch (IOException e) {
@@ -186,38 +229,7 @@ public class Browser {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        /*
-        List incomes = new ArrayList<Incomes>();
-        boolean firstTimeFlag = true;
-        String transformedDate = "Fecha de Emisión";
-
-        for (final HtmlTableRow row : table.getRows()) {
-
-            if (!firstTimeFlag) {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-                Date date = simpleDateFormat.parse(row.getCells().get(6).asText());
-
-                SimpleDateFormat simpleDateFormatAux = new SimpleDateFormat("dd/MM/yyyy");
-                transformedDate = simpleDateFormatAux.format(date);
-            }
-            firstTimeFlag = false;
-
-
-            incomes.add(
-                    new Incomes(
-                            row.getCells().get(1).asText(), //fiscalId
-                            row.getCells().get(2).asText(), //emisorRFC
-                            row.getCells().get(3).asText(), //emisorName
-                            row.getCells().get(4).asText(), //receiverRFC
-                            row.getCells().get(5).asText(), //receiverName
-                            transformedDate,                //emitedDate
-                            row.getCells().get(7).asText(), //certificationDate
-                            row.getCells().get(8).asText(), //certifiedPAC
-                            row.getCells().get(9).asText(), //total
-                            row.getCells().get(10).asText(),//voucherEffect
-                            row.getCells().get(11).asText() //voucherStatus
-                    )
-            );*/
+        incomesRepository.save(incomes);
         return webClient;
     }
 
