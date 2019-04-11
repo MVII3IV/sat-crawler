@@ -24,7 +24,7 @@ public class CrawlerController {
     @RequestMapping(value = "/extract/data", method = RequestMethod.GET)
     public String getUserData(@RequestParam String rfc, @RequestParam String pass) throws IOException {
         WebClient webClient = browser.login(rfc, pass);
-        webClient = browser.getUserData(webClient);
+        webClient = browser.getUserData(webClient, rfc);
         return "hello";
     }
 

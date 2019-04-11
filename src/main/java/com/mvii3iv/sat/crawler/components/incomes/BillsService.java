@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class IncomesService {
+public class BillsService {
 
 
     public List getBills() {
@@ -18,5 +18,5 @@ public class IncomesService {
         this.bills = bills;
     }
 
-    private List bills = new ArrayList<Incomes>();
+    private List bills = new ArrayList<Bills>();
 }

@@ -3,10 +3,11 @@ package com.mvii3iv.sat.crawler.components.incomes;
 
 import org.springframework.data.annotation.Id;
 
-public class Incomes {
+public class Bills {
 
     @Id
     private String fiscalId;
+    private String userId;
     private String emisorRFC;
     private String emisorName;
     private String receiverRFC;
@@ -25,16 +26,17 @@ public class Incomes {
 
     @Override
     public String toString(){
-        return String.format("Incomes[fiscalId=%s, emisorRFC='%s', emisorName='%s', receiverRFC='%s', emitedDate='%s', certificationDate='%s', certifiedPAC='%s', total='%s', voucherEffect='%s', cancelationStatus='%s', voucherStatus='%s', cancelationProcessStatus='%s', cancelationProcessDate='%s', emited='%b']",
+        return String.format("Bills[fiscalId=%s, userId=%s, emisorRFC='%s', emisorName='%s', receiverRFC='%s', emitedDate='%s', certificationDate='%s', certifiedPAC='%s', total='%s', voucherEffect='%s', cancelationStatus='%s', voucherStatus='%s', cancelationProcessStatus='%s', cancelationProcessDate='%s', emited='%b']",
                 fiscalId, emisorRFC, emisorName, receiverRFC, receiverName, emitedDate, certificationDate, certifiedPAC, total, voucherEffect, cancelationStatus, voucherStatus, cancelationProcessStatus, cancelationProcessDate, emited);
     }
 
-    public Incomes(){
+    public Bills(){
 
     }
 
-    public Incomes(String fiscalId, String emisorRFC, String emisorName, String receiverRFC, String receiverName, String emitedDate, String certificationDate, String certifiedPAC, String total, String voucherEffect, String cancelationStatus, String voucherStatus, String cancelationProcessStatus, String cancelationProcessDate, boolean emited) {
+    public Bills(String fiscalId, String userId, String emisorRFC, String emisorName, String receiverRFC, String receiverName, String emitedDate, String certificationDate, String certifiedPAC, String total, String voucherEffect, String cancelationStatus, String voucherStatus, String cancelationProcessStatus, String cancelationProcessDate, boolean emited) {
         this.fiscalId = fiscalId;
+        this.userId = userId;
         this.emisorRFC = emisorRFC;
         this.emisorName = emisorName;
         this.receiverRFC = receiverRFC;
@@ -57,6 +59,14 @@ public class Incomes {
 
     public void setFiscalId(String fiscalId) {
         this.fiscalId = fiscalId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getEmisorRFC() {
