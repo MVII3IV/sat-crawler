@@ -5,8 +5,8 @@ import com.mvii3iv.sat.crawler.components.captcha.*;
 import com.gargoylesoftware.htmlunit.*;
 import com.gargoylesoftware.htmlunit.html.*;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
-import com.mvii3iv.sat.crawler.components.incomes.Bills;
-import com.mvii3iv.sat.crawler.components.incomes.BillsRepository;
+import com.mvii3iv.sat.crawler.components.bills.Bills;
+import com.mvii3iv.sat.crawler.components.bills.BillsRepository;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -56,10 +56,10 @@ public class Browser {
     }
 
 
-    public WebClient getUserData(WebClient webClient, String rfc) {
+    public List<Bills> getUserData(WebClient webClient, String rfc) {
         getReceivedBills(webClient, rfc);
         getEmittedBills(webClient, rfc);
-        return null;
+        return billsRepository.findByUserId(rfc);
     }
 
 
@@ -106,7 +106,7 @@ public class Browser {
                     if (table.getRows().size() <= 1)
                         continue;
 
-                    billsRepository.save(getIncomesFromTable(table, rfc));
+                    billsRepository.save(getBillsFromTable(table, rfc, false));
                 }
 
         } catch (IOException e) {
@@ -158,13 +158,13 @@ public class Browser {
             e.printStackTrace();
         }
 
-        billsRepository.save(getIncomesFromTable(table, rfc));
+        billsRepository.save(getBillsFromTable(table, rfc, true));
 
         return webClient;
     }
 
 
-    private List<Bills> getIncomesFromTable(HtmlTable table, String rfc){
+    private List<Bills> getBillsFromTable(HtmlTable table, String rfc, boolean isEmmited){
 
         List incomes = new ArrayList<Bills>();
         boolean firstTimeFlag = true;
@@ -203,7 +203,7 @@ public class Browser {
                             row.getCells().get(12).asText(), //Estado del Comprobante
                             row.getCells().get(13).asText(), //Estatus de Proceso de Cancelación
                             row.getCells().get(14).asText(), //Fecha de Proceso de Cancelación
-                            true
+                            isEmmited
                     )
             );
         }
@@ -214,9 +214,23 @@ public class Browser {
     public WebClient login(String rfc, String pass) {
 
         WebClient webClient = init();
+        boolean hasError = false;
+        int count = 0;
 
-        webClient = openLoginURL(webClient, rfc, pass);
-        webClient = getMainPage(webClient);
+        do {
+            try {
+                webClient = openLoginURL(webClient, rfc, pass);
+                webClient = getMainPage(webClient);
+            } catch (Exception e) {
+                hasError = true;
+                System.out.println("Error while login trying again, try number: " + count++);
+                if(count > 5)
+                    break;
+            }
+        }while(hasError);
+
+
+
 
         return webClient;
     }
@@ -344,6 +358,9 @@ public class Browser {
         LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
         java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
         java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
+        java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
+
+
 
         webClient.getOptions().setUseInsecureSSL(true);
         webClient.getOptions().setThrowExceptionOnScriptError(false);

@@ -1,4 +1,4 @@
-package com.mvii3iv.sat.crawler.components.incomes;
+package com.mvii3iv.sat.crawler.components.bills;
 
 
 import org.springframework.data.annotation.Id;
