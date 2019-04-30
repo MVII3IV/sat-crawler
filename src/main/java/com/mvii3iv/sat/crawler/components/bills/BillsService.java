@@ -17,6 +17,11 @@ public class BillsService {
     @Autowired
     Browser browser;
 
+    @Autowired
+    private BillsRepository billsRepository;
+
+    private List bills = new ArrayList<Bills>();
+
     public List getBills() {
         return bills;
     }
@@ -25,11 +30,24 @@ public class BillsService {
         this.bills = bills;
     }
 
-    private List bills = new ArrayList<Bills>();
+    public BillsService(BillsRepository billsRepository){
+        this.billsRepository = billsRepository;
+    }
 
-    public List<Bills> getUserDataByRfcAndPass(String rfc, String pass) throws IOException {
+    /**
+     *
+     * @param rfc
+     * @param pass
+     * @return
+     * @throws IOException
+     */
+    public List<Bills> extractUserDataFromSat(String rfc, String pass) throws IOException {
         WebClient webClient = browser.login(rfc, pass);
         return browser.getUserData(webClient, rfc);
+    }
+
+    public List<Bills> getBillsByRFC(String rfc) throws IOException {
+        return billsRepository.findByUserId(rfc);
     }
 
 

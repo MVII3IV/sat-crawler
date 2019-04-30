@@ -30,10 +30,7 @@ public class CrawlerController {
 
     @RequestMapping(value = "/extract/data", method = RequestMethod.GET)
     public List<Bills> getUserData(@RequestParam String rfc, @RequestParam String pass) throws IOException {
-
-        //WebClient webClient = browser.login(rfc, pass);
-        //return browser.getUserData(webClient, rfc);
-        return billsService.getUserDataByRfcAndPass(rfc, pass);
+        return billsService.extractUserDataFromSat(rfc, pass);
     }
 
 }
