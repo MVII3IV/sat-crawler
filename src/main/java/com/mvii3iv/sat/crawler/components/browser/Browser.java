@@ -1,6 +1,7 @@
 package com.mvii3iv.sat.crawler.components.browser;
 
 import com.mvii3iv.sat.crawler.components.anticaptcha.AntiCaptchaService;
+import com.mvii3iv.sat.crawler.components.assets.HostValidator;
 import com.mvii3iv.sat.crawler.components.captcha.*;
 import com.gargoylesoftware.htmlunit.*;
 import com.gargoylesoftware.htmlunit.html.*;
@@ -13,8 +14,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Year;
@@ -42,17 +45,20 @@ public class Browser {
     private CaptchaService captchaService;
     @Autowired
     private BillsRepository billsRepository;
+    @Autowired
+    private HostValidator hostValidator;
 
     /**
      * @param antiCaptchaService
      * @param captchaService
      * @param env
      */
-    public Browser(AntiCaptchaService antiCaptchaService, CaptchaService captchaService, Environment env, BillsRepository billsRepository) {
+    public Browser(AntiCaptchaService antiCaptchaService, CaptchaService captchaService, Environment env, BillsRepository billsRepository, HostValidator hostValidator) {
         this.antiCaptchaService = antiCaptchaService;
         this.captchaService = captchaService;
         this.env = env;
         this.billsRepository = billsRepository;
+        this.hostValidator = hostValidator;
     }
 
 
@@ -347,10 +353,10 @@ public class Browser {
 
         WebClient webClient = new WebClient();
 
-        if (Boolean.valueOf(env.getProperty("PROXY_ENABLED"))) {
+        if(hostValidator.isProxyRequired()){
             webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER, "proxy.autozone.com", 8080);
             DefaultCredentialsProvider credentialsProvider = (DefaultCredentialsProvider) webClient.getCredentialsProvider();
-            credentialsProvider.addCredentials("edomingu", "ASDewq123!");
+            credentialsProvider.addCredentials("edomingu", "asdEWQ123!");
         } else {
             webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER);
         }

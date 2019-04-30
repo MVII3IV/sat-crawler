@@ -3,6 +3,7 @@ package com.mvii3iv.sat.crawler.components.anticaptcha;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mvii3iv.sat.crawler.components.anticaptcha.models.*;
+import com.mvii3iv.sat.crawler.components.assets.HostValidator;
 import org.apache.xerces.impl.dv.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -25,8 +26,12 @@ public class AntiCaptchaService {
     private final String CREATE_TASK_URL = "https://api.anti-captcha.com/createTask";
 
     @Autowired
-    private Environment env;
+    private HostValidator hostValidator;
 
+
+    public AntiCaptchaService(HostValidator hostValidator){
+        this.hostValidator = hostValidator;
+    }
 
     /**
      * Calls all the methods in order to decode the captcha, this method is called to decode captchas
@@ -103,7 +108,7 @@ public class AntiCaptchaService {
             HttpURLConnection conn = null;
             URL url = new URL(u);
 
-            if (Boolean.valueOf(env.getProperty("PROXY_ENABLED"))) {
+            if(hostValidator.isProxyRequired()){
                 Proxy proxy = new Proxy(Proxy.Type.HTTP,
                         new InetSocketAddress("proxy.autozone.com", 8080));
                 conn = (HttpURLConnection) url.openConnection(proxy);
@@ -156,7 +161,7 @@ public class AntiCaptchaService {
                 HttpURLConnection conn = null;
                 URL url = new URL(u);
 
-                if (Boolean.valueOf(env.getProperty("PROXY_ENABLED"))) {
+                if(hostValidator.isProxyRequired()){
                     Proxy proxy = new Proxy(Proxy.Type.HTTP,
                             new InetSocketAddress("proxy.autozone.com", 8080));
                     conn = (HttpURLConnection) url.openConnection(proxy);

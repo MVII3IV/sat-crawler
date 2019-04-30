@@ -1,6 +1,7 @@
 package com.mvii3iv.sat.crawler.components.crawler;
 
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.mvii3iv.sat.crawler.components.bills.BillsService;
 import com.mvii3iv.sat.crawler.components.browser.Browser;
 import com.mvii3iv.sat.crawler.components.bills.Bills;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +20,20 @@ public class CrawlerController {
     @Autowired
     Browser browser;
 
-    public CrawlerController(Browser browser) {
+    @Autowired
+    BillsService billsService;
+
+    public CrawlerController(Browser browser, BillsService billsService) {
         this.browser = browser;
+        this.billsService = billsService;
     }
 
     @RequestMapping(value = "/extract/data", method = RequestMethod.GET)
     public List<Bills> getUserData(@RequestParam String rfc, @RequestParam String pass) throws IOException {
-        WebClient webClient = browser.login(rfc, pass);
-        return browser.getUserData(webClient, rfc);
+
+        //WebClient webClient = browser.login(rfc, pass);
+        //return browser.getUserData(webClient, rfc);
+        return billsService.getUserDataByRfcAndPass(rfc, pass);
     }
 
 }
