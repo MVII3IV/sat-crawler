@@ -25,9 +25,22 @@ public class BillsController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public List<Bills> getBillsByRfcAndPass(@RequestParam String rfc){
+    public List<Bills> getBillsByRfcAndPass(@RequestParam String rfc, @RequestParam String pass){
         try {
-            return billsService.getBillsByRFC(rfc);
+
+            if(rfc.isEmpty() || pass.isEmpty())
+                return null;
+
+            rfc = rfc.trim();
+            pass = pass.trim();
+
+            List<Bills> bills = billsService.getBillsByRFC(rfc);
+
+            if(bills.size() > 0)
+                return bills;
+            else
+                return billsService.extractUserDataFromSat(rfc, pass);
+
         } catch (IOException e) {
             e.printStackTrace();
             return null;
