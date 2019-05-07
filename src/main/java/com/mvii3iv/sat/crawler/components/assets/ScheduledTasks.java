@@ -14,7 +14,7 @@ public class ScheduledTasks {
     private static final Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 40 6 * * *")
     public void scheduleTaskWithFixedRate() {
         logger.info("Cron :: Execution Time - {}", dateTimeFormatter.format(LocalDateTime.now()) );
     }

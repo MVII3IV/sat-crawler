@@ -1,5 +1,6 @@
 package com.mvii3iv.sat.crawler.components.bills;
 
+import com.mvii3iv.sat.crawler.components.customers.CustomersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,9 +20,13 @@ public class BillsController {
     @Autowired
     private BillsService billsService;
 
-    public BillsController(BillsRepository billsRepository, BillsService billsService){
+    @Autowired
+    private CustomersService customersService;
+
+    public BillsController(BillsRepository billsRepository, BillsService billsService, CustomersService customersService) {
         this.billsRepository = billsRepository;
         this.billsService = billsService;
+        this.customersService = customersService;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -33,6 +38,9 @@ public class BillsController {
 
             rfc = rfc.trim();
             pass = pass.trim();
+
+            customersService.validateCustomer(rfc, pass);
+
 
             List<Bills> bills = billsService.getBillsByRFC(rfc);
 
