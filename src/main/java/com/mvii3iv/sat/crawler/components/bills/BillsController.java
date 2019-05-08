@@ -2,6 +2,7 @@ package com.mvii3iv.sat.crawler.components.bills;
 
 import com.mvii3iv.sat.crawler.components.customers.CustomersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,15 +24,21 @@ public class BillsController {
     @Autowired
     private CustomersService customersService;
 
-    public BillsController(BillsRepository billsRepository, BillsService billsService, CustomersService customersService) {
+    @Autowired
+    MongoTemplate mongoTemplate;
+
+    public BillsController(BillsRepository billsRepository, BillsService billsService, CustomersService customersService, MongoTemplate mongoTemplate) {
         this.billsRepository = billsRepository;
         this.billsService = billsService;
         this.customersService = customersService;
+        this.mongoTemplate = mongoTemplate;
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public List<Bills> getBillsByRfcAndPass(@RequestParam String rfc, @RequestParam String pass){
         try {
+
+            List<String> userIds = mongoTemplate.getCollection("bills").distinct("userId");
 
             if(rfc.isEmpty() || pass.isEmpty())
                 return null;
