@@ -38,7 +38,7 @@ public class BillsController {
     public List<Bills> getBillsByRfcAndPass(@RequestParam String rfc, @RequestParam String pass){
         try {
 
-            List<String> userIds = mongoTemplate.getCollection("bills").distinct("userId");
+            //List<String> userIds = mongoTemplate.getCollection("bills").distinct("userId");
 
             if(rfc.isEmpty() || pass.isEmpty())
                 return null;
