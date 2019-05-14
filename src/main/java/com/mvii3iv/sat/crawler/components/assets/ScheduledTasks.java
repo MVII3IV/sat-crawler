@@ -32,7 +32,10 @@ public class ScheduledTasks {
     }
 
     //@Scheduled(cron = "0 40 6 * * *")
-    @Scheduled(cron = "0 * * * * *")
+
+    //@Scheduled(cron = "0 * * * * *")
+    //                 s  m h  d m a
+    @Scheduled(cron = "0 47 10 * * *")
     public void scheduleTaskWithFixedRate() {
         logger.info("Extraction Task Started - ", dateTimeFormatter.format(LocalDateTime.now()) );
         List<Customers> customers = customersService.getCustomers();
