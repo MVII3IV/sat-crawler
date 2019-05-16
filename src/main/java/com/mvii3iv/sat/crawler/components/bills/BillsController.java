@@ -54,7 +54,7 @@ public class BillsController {
             if(bills.size() > 0)
                 return bills;
             else
-                return billsService.extractUserDataFromSat(rfc, pass);
+                return billsService.extractDataByUserFromSat(rfc, pass);
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -29,8 +29,15 @@ public class CrawlerController {
     }
 
     @RequestMapping(value = "/extract/data", method = RequestMethod.GET)
-    public List<Bills> getUserData(@RequestParam String rfc, @RequestParam String pass) throws IOException {
-        return billsService.extractUserDataFromSat(rfc, pass);
+    public int getUserData(@RequestParam String rfc, @RequestParam String pass) throws IOException {
+        billsService.extractDataByUserFromSat(rfc, pass);
+        return 200;
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.GET)
+    public int getUserData() throws IOException {
+        billsService.extractAllUserDataFromSat();
+        return 200;
     }
 
 }

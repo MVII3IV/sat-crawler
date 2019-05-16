@@ -1,8 +1,6 @@
 package com.mvii3iv.sat.crawler.components.customers;
 
 
-import org.springframework.data.annotation.Id;
-
 public class Customers {
 
     private String rfc;

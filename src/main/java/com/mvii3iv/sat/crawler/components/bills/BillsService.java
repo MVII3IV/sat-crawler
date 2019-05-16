@@ -3,6 +3,8 @@ package com.mvii3iv.sat.crawler.components.bills;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.mvii3iv.sat.crawler.components.browser.Browser;
+import com.mvii3iv.sat.crawler.components.customers.Customers;
+import com.mvii3iv.sat.crawler.components.customers.CustomersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +22,9 @@ public class BillsService {
     @Autowired
     private BillsRepository billsRepository;
 
+    @Autowired
+    private CustomersService customersService;
+
     private List bills = new ArrayList<Bills>();
 
     public List getBills() {
@@ -30,18 +35,20 @@ public class BillsService {
         this.bills = bills;
     }
 
-    public BillsService(BillsRepository billsRepository){
+    public BillsService(Browser browser, BillsRepository billsRepository, CustomersService customersService) {
+        this.browser = browser;
         this.billsRepository = billsRepository;
+        this.customersService = customersService;
     }
 
-    /**
-     *
-     * @param rfc
-     * @param pass
-     * @return
-     * @throws IOException
-     */
-    public List<Bills> extractUserDataFromSat(String rfc, String pass) throws IOException {
+    public void extractAllUserDataFromSat() {
+        List<Customers> customers = customersService.getCustomers();
+        for(Customers customer : customers){
+                extractDataByUserFromSat(customer.getRfc(), customer.getPass());
+        }
+    }
+
+    public List<Bills> extractDataByUserFromSat(String rfc, String pass) {
         WebClient webClient = browser.login(rfc, pass);
         return browser.getUserData(webClient, rfc);
     }
