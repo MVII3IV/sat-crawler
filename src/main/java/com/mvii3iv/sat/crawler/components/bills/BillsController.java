@@ -27,6 +27,13 @@ public class BillsController {
     @Autowired
     MongoTemplate mongoTemplate;
 
+    /**
+     *
+     * @param billsRepository
+     * @param billsService
+     * @param customersService
+     * @param mongoTemplate
+     */
     public BillsController(BillsRepository billsRepository, BillsService billsService, CustomersService customersService, MongoTemplate mongoTemplate) {
         this.billsRepository = billsRepository;
         this.billsService = billsService;
@@ -34,20 +41,25 @@ public class BillsController {
         this.mongoTemplate = mongoTemplate;
     }
 
+    /**
+     * Returns the bills by rfc and pass
+     * if there is information in the database returns that info
+     * otherwise go to SAT's site and extract info and returns it
+     * @param rfc
+     * @param pass
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET)
     public List<Bills> getBillsByRfcAndPass(@RequestParam String rfc, @RequestParam String pass){
         try {
-
-            //List<String> userIds = mongoTemplate.getCollection("bills").distinct("userId");
-
             if(rfc.isEmpty() || pass.isEmpty())
                 return null;
 
             rfc = rfc.trim();
             pass = pass.trim();
 
+            //looks if the customer is already on the database, if it doesn't then it is added to customers
             customersService.validateCustomer(rfc, pass);
-
 
             List<Bills> bills = billsService.getBillsByRFC(rfc);
 

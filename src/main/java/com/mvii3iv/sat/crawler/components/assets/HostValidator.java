@@ -12,13 +12,11 @@ public class HostValidator {
     private String MAGIC_WORD = "dz";
 
     public HostValidator(){
-
         try {
             HOST_NAME = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-
     }
 
     public boolean isProxyRequired(){

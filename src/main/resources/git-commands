@@ -1,0 +1,2 @@
+#accept changes from master
+git reset --hard origin/master
