@@ -28,13 +28,13 @@ public class ScheduledTasks {
 
 
     /**
-     * Scheduled task that calls extractAllUserDataFromSat
+     * Scheduled task that calls extractAllCustomersDataFromSat
      * and extracts information from all Customers
      */
     //                 s  m h  d m a
     @Scheduled(cron = "0 0 6 * * *")
     public void scheduleTaskWithFixedRate() {
         logger.info("Extraction Task Started - ", dateTimeFormatter.format(LocalDateTime.now()) );
-        billsService.extractAllUserDataFromSat();
+        billsService.extractAllCustomersDataFromSat();
     }
 }

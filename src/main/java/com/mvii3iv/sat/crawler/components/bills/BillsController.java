@@ -15,17 +15,15 @@ import java.util.List;
 @RequestMapping(value="/bills")
 public class BillsController {
 
+    /**
+     * Variables used by the class
+     */
     @Autowired
+    private MongoTemplate mongoTemplate;
     private BillsRepository billsRepository;
-
-    @Autowired
     private BillsService billsService;
-
-    @Autowired
     private CustomersService customersService;
 
-    @Autowired
-    MongoTemplate mongoTemplate;
 
     /**
      *

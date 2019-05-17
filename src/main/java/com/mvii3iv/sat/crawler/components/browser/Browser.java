@@ -38,17 +38,18 @@ public class Browser {
         GORA870926A8A   13081308    Alexandra
      */
 
-    private static final String LOGIN_URL = "https://portalcfdi.facturaelectronica.sat.gob.mx/";
+
     @Autowired
     private Environment env;
     private AntiCaptchaService antiCaptchaService;
     private CaptchaService captchaService;
-    @Autowired
     private BillsRepository billsRepository;
-    @Autowired
     private HostValidator hostValidator;
 
+    private static final String LOGIN_URL = "https://portalcfdi.facturaelectronica.sat.gob.mx/";
+
     /**
+     * Just the class constructor
      * @param antiCaptchaService
      * @param captchaService
      * @param env
@@ -62,6 +63,13 @@ public class Browser {
     }
 
 
+    /**
+     * This methods orders how the data is extracted from SAT by calling different methods
+     * at the end, it returns a List of Bills
+     * @param webClient
+     * @param rfc
+     * @return
+     */
     public List<Bills> getUserData(WebClient webClient, String rfc) {
         getReceivedBills(webClient, rfc);
         getEmittedBills(webClient, rfc);
@@ -69,6 +77,12 @@ public class Browser {
     }
 
 
+    /**
+     * Extracts received bills from SAT
+     * @param webClient
+     * @param rfc
+     * @return
+     */
     public WebClient getReceivedBills(WebClient webClient, String rfc) {
         HtmlTable table = null;
 
@@ -122,7 +136,13 @@ public class Browser {
         return webClient;
     }
 
-    
+
+    /**
+     * Extracts Emitted Bills from SAT
+     * @param webClient
+     * @param rfc
+     * @return a webclient
+     */
     public WebClient getEmittedBills(WebClient webClient, String rfc) {
 
         System.out.println("Extracting Emmitted bills..");
@@ -170,6 +190,13 @@ public class Browser {
     }
 
 
+    /**
+     * Receives a table and decompiles to extract its data and form a Bill register
+     * @param table
+     * @param rfc
+     * @param isEmmited
+     * @return List of Bills
+     */
     private List<Bills> getBillsFromTable(HtmlTable table, String rfc, boolean isEmmited){
 
         List incomes = new ArrayList<Bills>();
@@ -217,6 +244,12 @@ public class Browser {
         return incomes;
     }
 
+    /**
+     * This method do login in SAT
+     * @param rfc
+     * @param pass
+     * @return webclient with browser information
+     */
     public WebClient login(String rfc, String pass) {
 
         WebClient webClient = init();
@@ -349,6 +382,10 @@ public class Browser {
     }
 
 
+    /**
+     * Initializes the WebClient
+     * @return
+     */
     private WebClient init() {
 
         WebClient webClient = new WebClient();

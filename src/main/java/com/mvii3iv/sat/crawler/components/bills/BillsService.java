@@ -35,24 +35,47 @@ public class BillsService {
         this.bills = bills;
     }
 
+    /**
+     * The class constructor
+     * @param browser
+     * @param billsRepository
+     * @param customersService
+     */
     public BillsService(Browser browser, BillsRepository billsRepository, CustomersService customersService) {
         this.browser = browser;
         this.billsRepository = billsRepository;
         this.customersService = customersService;
     }
 
-    public void extractAllUserDataFromSat() {
+    /**
+     * This method gets all the Customers from the DB
+     * goes through the list and one by one extract data from SAT
+     */
+    public void extractAllCustomersDataFromSat() {
         List<Customers> customers = customersService.getCustomers();
         for(Customers customer : customers){
                 extractDataByUserFromSat(customer.getRfc(), customer.getPass());
         }
     }
 
+    /**
+     * Extracts data only by one Customer at the time
+     * this method is even used by extractAllCustomersDataFromSat
+     * @param rfc
+     * @param pass
+     * @return
+     */
     public List<Bills> extractDataByUserFromSat(String rfc, String pass) {
         WebClient webClient = browser.login(rfc, pass);
         return browser.getUserData(webClient, rfc);
     }
 
+    /**
+     * Returns Bills by user rfc and password
+     * @param rfc
+     * @return
+     * @throws IOException
+     */
     public List<Bills> getBillsByRFC(String rfc) throws IOException {
         return billsRepository.findByUserId(rfc);
     }
