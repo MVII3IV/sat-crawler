@@ -18,13 +18,8 @@ public class BillsService {
 
     @Autowired
     Browser browser;
-
-    @Autowired
     private BillsRepository billsRepository;
-
-    @Autowired
     private CustomersService customersService;
-
     private List bills = new ArrayList<Bills>();
 
     public List getBills() {

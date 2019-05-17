@@ -2,6 +2,7 @@ package com.mvii3iv.sat.crawler.components.anticaptcha.models;
 
 
 public class AntiCaptchaCreatedTaskResponse {
+
     private int errorId;
     private double taskId;
 
