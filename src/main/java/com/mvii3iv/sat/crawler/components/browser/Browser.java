@@ -219,6 +219,10 @@ public class Browser {
             }
             firstTimeFlag = false;
 
+            if(row.getCells().get(12).asText().toLowerCase().equals("cancelado")){
+                continue;
+            }
+
             incomes.add(
                     new Bills(
                             row.getCells().get(1).asText(),  //fiscalId
