@@ -202,6 +202,7 @@ public class Browser {
         List incomes = new ArrayList<Bills>();
         boolean firstTimeFlag = true;
         String transformedDate = "Fecha de Emisión";
+        boolean isEdited = false;
 
         System.out.println("extracting data from the table...");
         for (final HtmlTableRow row : table.getRows()) {
@@ -219,9 +220,20 @@ public class Browser {
             }
             firstTimeFlag = false;
 
-            if(row.getCells().get(12).asText().toLowerCase().equals("cancelado")){
+            if( row.getCells().get(12).asText().toLowerCase().equals("cancelado") ){
                 continue;
             }
+
+            if(isEmmited == false && row.getCells().get(10).asText().toLowerCase().equals("nomina")){
+                continue;
+            }
+
+            if(isEmmited == true && ( row.getCells().get(10).asText().toLowerCase().equals("nomina") || ( row.getCells().get(10).asText().toLowerCase().equals("ingreso")))    ){
+                isEmmited = false;
+                isEdited = true;
+            }
+
+
 
             incomes.add(
                     new Bills(
@@ -235,12 +247,14 @@ public class Browser {
                             row.getCells().get(7).asText(),  //certificationDate
                             row.getCells().get(8).asText(),  //certifiedPAC
                             row.getCells().get(9).asText(),  //total
-                            row.getCells().get(10).asText(), //Efecto del Comprobante
+                            row.getCells().get(10).asText(), //Efecto del Comprobante //voucher effect
                             row.getCells().get(11).asText(), //Estatus de cancelación
-                            row.getCells().get(12).asText(), //Estado del Comprobante
+                            row.getCells().get(12).asText(), //Estado del Comprobante //voucher status
                             row.getCells().get(13).asText(), //Estatus de Proceso de Cancelación
                             row.getCells().get(14).asText(), //Fecha de Proceso de Cancelación
-                            isEmmited
+                            isEmmited,
+                            isEdited
+
                     )
             );
         }

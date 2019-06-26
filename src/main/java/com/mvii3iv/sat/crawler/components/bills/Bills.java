@@ -22,19 +22,20 @@ public class Bills {
     private String cancelationProcessStatus;
     private String cancelationProcessDate;
     private boolean emited;
+    private boolean edited;
 
 
     @Override
     public String toString(){
-        return String.format("Bills[fiscalId=%s, userId=%s, emisorRFC='%s', emisorName='%s', receiverRFC='%s', emitedDate='%s', certificationDate='%s', certifiedPAC='%s', total='%s', voucherEffect='%s', cancelationStatus='%s', voucherStatus='%s', cancelationProcessStatus='%s', cancelationProcessDate='%s', emited='%b']",
-                fiscalId, emisorRFC, emisorName, receiverRFC, receiverName, emitedDate, certificationDate, certifiedPAC, total, voucherEffect, cancelationStatus, voucherStatus, cancelationProcessStatus, cancelationProcessDate, emited);
+        return String.format("Bills[fiscalId=%s, userId=%s, emisorRFC='%s', emisorName='%s', receiverRFC='%s', emitedDate='%s', certificationDate='%s', certifiedPAC='%s', total='%s', voucherEffect='%s', cancelationStatus='%s', voucherStatus='%s', cancelationProcessStatus='%s', cancelationProcessDate='%s', emited='%b', edited='%b']",
+                fiscalId, emisorRFC, emisorName, receiverRFC, receiverName, emitedDate, certificationDate, certifiedPAC, total, voucherEffect, cancelationStatus, voucherStatus, cancelationProcessStatus, cancelationProcessDate, emited, edited);
     }
 
     public Bills(){
 
     }
 
-    public Bills(String fiscalId, String userId, String emisorRFC, String emisorName, String receiverRFC, String receiverName, String emitedDate, String certificationDate, String certifiedPAC, String total, String voucherEffect, String cancelationStatus, String voucherStatus, String cancelationProcessStatus, String cancelationProcessDate, boolean emited) {
+    public Bills(String fiscalId, String userId, String emisorRFC, String emisorName, String receiverRFC, String receiverName, String emitedDate, String certificationDate, String certifiedPAC, String total, String voucherEffect, String cancelationStatus, String voucherStatus, String cancelationProcessStatus, String cancelationProcessDate, boolean emited, boolean edited) {
         this.fiscalId = fiscalId;
         this.userId = userId;
         this.emisorRFC = emisorRFC;
@@ -51,6 +52,7 @@ public class Bills {
         this.cancelationProcessStatus = cancelationProcessStatus;
         this.cancelationProcessDate = cancelationProcessDate;
         this.emited = emited;
+        this.edited = edited;
     }
 
     public String getFiscalId() {
@@ -179,5 +181,13 @@ public class Bills {
 
     public void setEmited(boolean emited) {
         this.emited = emited;
+    }
+
+    public boolean isEdited() {
+        return edited;
+    }
+
+    public void setEdited(boolean edited) {
+        this.edited = edited;
     }
 }
