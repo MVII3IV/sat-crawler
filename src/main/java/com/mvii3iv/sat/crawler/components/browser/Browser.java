@@ -202,7 +202,7 @@ public class Browser {
         List incomes = new ArrayList<Bills>();
         boolean firstTimeFlag = true;
         String transformedDate = "Fecha de Emisión";
-        boolean isEdited = false;
+
 
         System.out.println("extracting data from the table...");
         for (final HtmlTableRow row : table.getRows()) {
@@ -227,6 +227,8 @@ public class Browser {
             if(isEmmited == false && row.getCells().get(10).asText().toLowerCase().equals("nomina")){
                 continue;
             }
+
+            boolean isEdited = false;
 
             if(isEmmited == true && ( row.getCells().get(10).asText().toLowerCase().equals("nomina") || ( row.getCells().get(10).asText().toLowerCase().equals("ingreso")))    ){
                 isEmmited = false;

@@ -60,10 +60,10 @@ public class BillsController {
             customersService.validateCustomer(rfc, pass);
 
             List<Bills> bills = billsService.getBillsByRFC(rfc);
-/*
+
             if(bills.size() > 0)
                 return bills;
-            else*/
+            else
                 return billsService.extractDataByUserFromSat(rfc, pass);
 
         } catch (IOException e) {
