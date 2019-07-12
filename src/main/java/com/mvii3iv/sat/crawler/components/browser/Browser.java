@@ -218,7 +218,9 @@ public class Browser {
                 SimpleDateFormat simpleDateFormatAux = new SimpleDateFormat("dd/MM/yyyy");
                 transformedDate = simpleDateFormatAux.format(date);
             }
+
             firstTimeFlag = false;
+            boolean isEdited = false;
 
             if( row.getCells().get(12).asText().toLowerCase().equals("cancelado") ){
                 continue;
@@ -228,9 +230,9 @@ public class Browser {
                 continue;
             }
 
-            boolean isEdited = false;
 
-            if(isEmmited == true && ( row.getCells().get(10).asText().toLowerCase().equals("nomina") || ( row.getCells().get(10).asText().toLowerCase().equals("ingreso")))    ){
+
+            if(isEmmited == true && ( row.getCells().get(10).asText().toLowerCase().equals("nomina") || ( row.getCells().get(10).asText().toLowerCase().equals("egreso")))    ){
                 isEmmited = false;
                 isEdited = true;
             }
