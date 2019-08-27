@@ -222,7 +222,7 @@ public class Browser {
             firstTimeFlag = false;
             boolean isEdited = false;
 
-            /*
+
             if( row.getCells().get(12).asText().toLowerCase().equals("cancelado") ){
                 continue;
             }
@@ -236,7 +236,7 @@ public class Browser {
             if(isEmmited == true && ( row.getCells().get(10).asText().toLowerCase().equals("nomina") || ( row.getCells().get(10).asText().toLowerCase().equals("egreso")))    ){
                 isEmmited = false;
                 isEdited = true;
-            }*/
+            }
 
 
 
