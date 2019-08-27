@@ -1,0 +1,11 @@
+//show dbs
+show dbs
+
+//show collections (tables)
+show collections
+
+//drop a collection
+db.COLLECTION_NAME.drop()
+
+//find
+db.COLLECTION_NAME.find()

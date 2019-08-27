@@ -416,7 +416,7 @@ public class Browser {
         if(hostValidator.isProxyRequired()){
             webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER, "proxy.autozone.com", 8080);
             DefaultCredentialsProvider credentialsProvider = (DefaultCredentialsProvider) webClient.getCredentialsProvider();
-            credentialsProvider.addCredentials("edomingu", "asdEWQ123!");
+            credentialsProvider.addCredentials("edomingu", "SDFrew234@");
         } else {
             webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER);
         }
