@@ -222,6 +222,7 @@ public class Browser {
             firstTimeFlag = false;
             boolean isEdited = false;
 
+            /*
             if( row.getCells().get(12).asText().toLowerCase().equals("cancelado") ){
                 continue;
             }
@@ -236,7 +237,7 @@ public class Browser {
                 isEmmited = false;
                 isEdited = true;
             }
-
+            */
 
 
             incomes.add(
