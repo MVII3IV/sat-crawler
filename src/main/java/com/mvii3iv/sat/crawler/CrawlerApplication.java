@@ -3,6 +3,8 @@ package com.mvii3iv.sat.crawler;
 import com.mvii3iv.sat.crawler.components.anticaptcha.AntiCaptchaService;
 import com.mvii3iv.sat.crawler.components.browser.Browser;
 import com.mvii3iv.sat.crawler.components.captcha.CaptchaService;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

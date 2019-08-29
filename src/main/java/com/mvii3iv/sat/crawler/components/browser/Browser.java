@@ -9,6 +9,7 @@ import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
 import com.mvii3iv.sat.crawler.components.bills.Bills;
 import com.mvii3iv.sat.crawler.components.bills.BillsRepository;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -85,8 +86,12 @@ public class Browser {
      * @return
      */
     public WebClient getReceivedBills(WebClient webClient, String rfc) {
-        HtmlTable table = null;
 
+        System.out.println("----------------------------------------------------------------------------------------");
+        System.out.println("-----------------------------Extracting Received Bills----------------------------------");
+        System.out.println("----------------------------------------------------------------------------------------");
+
+        HtmlTable table = null;
         String transformedDate = "Fecha de Emisión";
         String month = "01";
         String day = "01";
@@ -109,25 +114,32 @@ public class Browser {
                     monthSelect.setSelectedAttribute(option, true);
                     browser = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_BtnBusqueda")).click();
 
+                    System.out.println("\n" + new Date() +  " [INFO] - Extracting data for month number: " + month);
+
                     do {
-                        System.out.println("try number: " + count++);
+                        System.out.println(new Date() + " [INFO] - this is the try number: " + ++count);
                         webClient.waitForBackgroundJavaScript(1000 * count);
                         table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
 
 
                         if (browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")) {
-                            System.out.println("no info available for that user");
+                            System.out.println(new Date() + " [WARNING] - There is no information available for the current month ( " + month + " )");
                             break;
                         }
 
-                        if (count > 6)
+                        if (count > 6){
+                            System.out.println(new Date() + " [ERROR] - I have tried more than 6 times to extract information, skipping month: " + month);
                             break;
+                        }
+
+
                     } while (table.getRows().size() <= 1);
 
                     if (table.getRows().size() <= 1)
                         continue;
 
                     billsRepository.save(getBillsFromTable(table, rfc, false));
+                    System.out.println(new Date() + " [INFO] - Extraction complete, month: " + month);
                 }
 
         } catch (IOException e) {
@@ -146,24 +158,26 @@ public class Browser {
      */
     public WebClient getEmittedBills(WebClient webClient, String rfc) {
 
-        System.out.println("Extracting Emmitted bills..");
+        System.out.println("----------------------------------------------------------------------------------------");
+        System.out.println("-----------------------------Extracting Emitted Bills-----------------------------------");
+        System.out.println("----------------------------------------------------------------------------------------");
         HtmlTable table = null;
         List incomes = new ArrayList<Bills>();
 
         try {
-            System.out.print("Loading sat emitted bill page:");
+            System.out.print(new Date() + " [INFO] - Loading sat emitted bill page:");
             HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
             browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaEmisor.aspx");
-            System.out.println(" OK!");
 
 
-            System.out.print("Selecting Date Range ");
+
+            System.out.print(new Date() + " [INFO] - Selecting Date Range ");
             browser.getHtmlElementById("ctl00_MainContent_RdoFechas").click();
             ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFechaInicial2_Calendario_text")).setValueAttribute("01/01/" + Year.now().getValue());
             ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFechaFinal2_Calendario_text")).setValueAttribute(new SimpleDateFormat("dd/MM/yyy").format(new Date()));
-            System.out.print("01/01/" + Year.now().getValue() + " to " + new SimpleDateFormat("dd/MM/yyy").format(new Date()));
+            System.out.print(new Date() + " [INFO] - Getting data from 01/01/" + Year.now().getValue() + " to " + new SimpleDateFormat("dd/MM/yyy").format(new Date()));
             browser = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_BtnBusqueda")).click();
-            System.out.println("Date selected: OK!");
+
 
             int counter = 0;
             do {
@@ -171,12 +185,12 @@ public class Browser {
                 table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
 
                 if(counter > 6){
-                    System.out.println("Javascript background time over exceeded");
+                    System.out.println(new Date() + " [ERROR] - Javascript background time over exceeded");
                     return null;
                 }
 
                 if (browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")) {
-                    System.out.println("no info available for that user");
+                    System.out.println(new Date() + " [WARNING] - There is no information available");
                     return null;
                 }
             } while (table.getRows().size() <= 1);
@@ -186,6 +200,7 @@ public class Browser {
         }
 
         billsRepository.save(getBillsFromTable(table, rfc, true));
+        System.out.print(new Date() + " [INFO] - Emitted Bills Extracted Successfully");
 
         return webClient;
     }
@@ -204,11 +219,16 @@ public class Browser {
         boolean firstTimeFlag = true;
         String transformedDate = "Fecha de Emisión";
 
-
-        System.out.println("extracting data from the table...");
         for (final HtmlTableRow row : table.getRows()) {
 
-            if (!firstTimeFlag) {
+            //this variable tells me if the bill has been modified
+            boolean isEdited = false;
+
+            if(firstTimeFlag) {
+                firstTimeFlag = false;
+                continue;
+            }
+            else{
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                 Date date = null;
                 try {
@@ -219,9 +239,6 @@ public class Browser {
                 SimpleDateFormat simpleDateFormatAux = new SimpleDateFormat("dd/MM/yyyy");
                 transformedDate = simpleDateFormatAux.format(date);
             }
-
-            firstTimeFlag = false;
-            boolean isEdited = false;
 
             /*
             if( row.getCells().get(12).asText().toLowerCase().equals("cancelado") ){
@@ -239,7 +256,6 @@ public class Browser {
                 isEdited = true;
             }
             */
-
 
             incomes.add(
                     new Bills(
@@ -264,7 +280,7 @@ public class Browser {
                     )
             );
         }
-        System.out.println("Information extracted successfully");
+
         return incomes;
     }
 
@@ -414,6 +430,9 @@ public class Browser {
 
         WebClient webClient = new WebClient();
 
+        java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
+        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+
         if(hostValidator.isProxyRequired()){
             webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER, "proxy.autozone.com", 8080);
             DefaultCredentialsProvider credentialsProvider = (DefaultCredentialsProvider) webClient.getCredentialsProvider();
@@ -427,8 +446,8 @@ public class Browser {
         java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
         java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 
-
-
+        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+        webClient.getOptions().setPrintContentOnFailingStatusCode(false);
         webClient.getOptions().setUseInsecureSSL(true);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
         webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
@@ -473,6 +492,9 @@ public class Browser {
 
             }
         });
+
+
+
 
         return webClient;
         //CookieManager cookieMan = new CookieManager();
