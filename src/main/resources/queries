@@ -9,3 +9,11 @@ db.COLLECTION_NAME.drop()
 
 //find
 db.COLLECTION_NAME.find()
+
+
+users
+{ "_id" : ObjectId("5ccdd99afcbdad3f30800ac8"), "_class" : "com.mvii3iv.sat.crawler.components.customers.Customers", "rfc" : "LULR860821MTA", "pass" : "goluna21" }
+{ "_id" : ObjectId("5cdce3a6aa42da0424ba7d91"), "_class" : "com.mvii3iv.sat.crawler.components.customers.Customers", "rfc" : "CASA8412202SA", "pass" : "17201720" }
+{ "_id" : ObjectId("5cdce567aa42da0424ba7d92"), "_class" : "com.mvii3iv.sat.crawler.components.customers.Customers", "rfc" : "PACY920531TS9", "pass" : "ab45ac56" }
+{ "_id" : ObjectId("5cdce5a6aa42da0424ba7d93"), "_class" : "com.mvii3iv.sat.crawler.components.customers.Customers", "rfc" : "OIGO510728N20", "pass" : "ab45ac56" }
+{ "_id" : ObjectId("5d69e46d35fa73049cc7fe75"), "_class" : "com.mvii3iv.sat.crawler.components.customers.Customers", "rfc" : "PACE380810SH6", "pass" : "Haciend9" }

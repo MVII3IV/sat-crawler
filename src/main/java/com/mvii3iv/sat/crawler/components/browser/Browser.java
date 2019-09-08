@@ -96,6 +96,7 @@ public class Browser {
         String month = "01";
         String day = "01";
         List incomes = new ArrayList<Bills>();
+        int billsCount = 0;
 
         try {
             HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
@@ -135,12 +136,16 @@ public class Browser {
 
                     } while (table.getRows().size() <= 1);
 
+                    billsCount += table.getRows().size();
+
                     if (table.getRows().size() <= 1)
                         continue;
 
                     billsRepository.save(getBillsFromTable(table, rfc, false));
-                    System.out.println(new Date() + " [INFO] - Extraction complete, month: " + month);
+                    System.out.println(new Date() + " [INFO] - Extraction complete for month: " + month);
                 }
+
+            System.out.println(new Date() + "[INFO] - All extraction is complete, Received bills captured: " + billsCount);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -162,6 +167,7 @@ public class Browser {
         System.out.println("-----------------------------Extracting Emitted Bills-----------------------------------");
         System.out.println("----------------------------------------------------------------------------------------");
         HtmlTable table = null;
+        int billsCount = 0;
         List incomes = new ArrayList<Bills>();
 
         try {
@@ -199,8 +205,10 @@ public class Browser {
             e.printStackTrace();
         }
 
+        billsCount += table.getRows().size();
+
         billsRepository.save(getBillsFromTable(table, rfc, true));
-        System.out.print(new Date() + " [INFO] - Emitted Bills Extracted Successfully");
+        System.out.print(new Date() + " [INFO] - Emitted Bills Extracted Successfully, Emitted bills captured: " + billsCount);
 
         return webClient;
     }
@@ -340,7 +348,7 @@ public class Browser {
                 HtmlForm loginForm = browser.getFormByName("IDPLogin");
                 HtmlInput rfc = loginForm.getInputByName("Ecom_User_ID");
                 HtmlPasswordInput pass = loginForm.getInputByName("Ecom_Password");
-                HtmlInput captcha = loginForm.getInputByName("jcaptcha");
+                HtmlInput captcha = loginForm.getInputByName("userCaptcha");
                 HtmlInput sendButton = loginForm.getInputByName("submit");
                 rfc.setValueAttribute(RFC);
                 pass.setValueAttribute(PASS);
@@ -430,9 +438,6 @@ public class Browser {
 
         WebClient webClient = new WebClient();
 
-        java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
-        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-
         if(hostValidator.isProxyRequired()){
             webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER, "proxy.autozone.com", 8080);
             DefaultCredentialsProvider credentialsProvider = (DefaultCredentialsProvider) webClient.getCredentialsProvider();
@@ -441,7 +446,7 @@ public class Browser {
             webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER);
         }
 
-        LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+        //LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
         java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
         java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
         java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
