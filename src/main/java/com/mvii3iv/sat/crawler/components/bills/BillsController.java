@@ -48,7 +48,7 @@ public class BillsController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET)
-    public List<Bills> getBillsByRfcAndPass(@RequestParam String rfc, @RequestParam String pass){
+    public List<Bills> getBillsByRfcAndPass(@RequestParam String rfc, @RequestParam String pass, @RequestParam(required = false) boolean extract){
         try {
             if(rfc.isEmpty() || pass.isEmpty())
                 return null;
@@ -61,7 +61,7 @@ public class BillsController {
 
             List<Bills> bills = billsService.getBillsByRFC(rfc);
 
-            if(bills.size() > 0)
+            if(bills.size() > 0 && extract != true )
                 return bills;
             else
                 return billsService.extractDataByUserFromSat(rfc, pass);

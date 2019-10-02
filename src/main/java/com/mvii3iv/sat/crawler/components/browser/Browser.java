@@ -8,6 +8,8 @@ import com.gargoylesoftware.htmlunit.html.*;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
 import com.mvii3iv.sat.crawler.components.bills.Bills;
 import com.mvii3iv.sat.crawler.components.bills.BillsRepository;
+import com.mvii3iv.sat.crawler.components.records.BillsRecords;
+import com.mvii3iv.sat.crawler.components.records.BillsRecordsRepository;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Year;
@@ -38,7 +41,12 @@ public class Browser {
         OIGO510728N20   ab45ac56    Olga
         GORA870926A8A   13081308    Alexandra
         PACE380810SH6   Haciend9
+        MIQE900707P41   MIQE9007
+
+        count sat
+        document.querySelector("#ctl00_MainContent_tblResult > tbody").childElementCount
      */
+
 
 
     @Autowired
@@ -47,6 +55,7 @@ public class Browser {
     private CaptchaService captchaService;
     private BillsRepository billsRepository;
     private HostValidator hostValidator;
+    private BillsRecordsRepository billsRecordsRepository;
 
     private static final String LOGIN_URL = "https://portalcfdi.facturaelectronica.sat.gob.mx/";
 
@@ -56,12 +65,13 @@ public class Browser {
      * @param captchaService
      * @param env
      */
-    public Browser(AntiCaptchaService antiCaptchaService, CaptchaService captchaService, Environment env, BillsRepository billsRepository, HostValidator hostValidator) {
+    public Browser(AntiCaptchaService antiCaptchaService, CaptchaService captchaService, Environment env, BillsRepository billsRepository, HostValidator hostValidator, BillsRecordsRepository billsRecordsRepository) {
         this.antiCaptchaService = antiCaptchaService;
         this.captchaService = captchaService;
         this.env = env;
         this.billsRepository = billsRepository;
         this.hostValidator = hostValidator;
+        this.billsRecordsRepository = billsRecordsRepository;
     }
 
 
@@ -106,8 +116,13 @@ public class Browser {
 
             for (int i = 1; i < (Calendar.getInstance().get(Calendar.MONTH) + 2) + 1; i++) {
 
+                if(i == 10)
+                    System.out.println();
+
                 if (i < 10)
                     month = "0" + i;
+                else
+                    month = String.valueOf(i);
                     int count = 0;
 
                     HtmlSelect monthSelect = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFecha_DdlMes");
@@ -136,16 +151,19 @@ public class Browser {
 
                     } while (table.getRows().size() <= 1);
 
-                    billsCount += table.getRows().size();
 
+                    //replace this by a throw exception
                     if (table.getRows().size() <= 1)
                         continue;
 
-                    billsRepository.save(getBillsFromTable(table, rfc, false));
-                    System.out.println(new Date() + " [INFO] - Extraction complete for month: " + month);
+                    List<Bills> bill = getBillsFromTable(table, rfc, false);
+                    billsRepository.save(bill);
+                    billsCount += bill.size();
+                    System.out.println(new Date() + " [INFO] - Extraction complete for month: " + month + ", total of bills: " + bill.size());
                 }
 
             System.out.println(new Date() + "[INFO] - All extraction is complete, Received bills captured: " + billsCount);
+            billsRecordsRepository.save(new BillsRecords(rfc, false, ++billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -205,9 +223,12 @@ public class Browser {
             e.printStackTrace();
         }
 
-        billsCount += table.getRows().size();
 
-        billsRepository.save(getBillsFromTable(table, rfc, true));
+
+        List<Bills> bill = getBillsFromTable(table, rfc, true);
+        billsRepository.save(bill);
+        billsCount += bill.size();
+        billsRecordsRepository.save(new BillsRecords(rfc, false, ++billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));
         System.out.print(new Date() + " [INFO] - Emitted Bills Extracted Successfully, Emitted bills captured: " + billsCount);
 
         return webClient;
@@ -264,6 +285,9 @@ public class Browser {
                 isEdited = true;
             }
             */
+
+            if(row.getCells().get(5).asText().toLowerCase().contains("sergio"))
+                System.out.println();
 
             incomes.add(
                     new Bills(
