@@ -44,7 +44,7 @@ public class Browser {
         MIQE900707P41   MIQE9007
 
         count sat
-        document.querySelector("#ctl00_MainContent_tblResult > tbody").childElementCount
+        document.querySelector("#ctl00_MainContent_tblResult > tbody").childElementCount-1
      */
 
 
@@ -157,13 +157,13 @@ public class Browser {
                         continue;
 
                     List<Bills> bill = getBillsFromTable(table, rfc, false);
-                    billsRepository.save(bill);
+                    bill = billsRepository.save(bill);
                     billsCount += bill.size();
                     System.out.println(new Date() + " [INFO] - Extraction complete for month: " + month + ", total of bills: " + bill.size());
                 }
 
             System.out.println(new Date() + "[INFO] - All extraction is complete, Received bills captured: " + billsCount);
-            billsRecordsRepository.save(new BillsRecords(rfc, false, ++billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));
+            billsRecordsRepository.save(new BillsRecords(rfc, false, billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -226,9 +226,9 @@ public class Browser {
 
 
         List<Bills> bill = getBillsFromTable(table, rfc, true);
-        billsRepository.save(bill);
+        bill = billsRepository.save(bill);
         billsCount += bill.size();
-        billsRecordsRepository.save(new BillsRecords(rfc, false, ++billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));
+        billsRecordsRepository.save(new BillsRecords(rfc, true, billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));
         System.out.print(new Date() + " [INFO] - Emitted Bills Extracted Successfully, Emitted bills captured: " + billsCount);
 
         return webClient;
@@ -291,7 +291,7 @@ public class Browser {
 
             incomes.add(
                     new Bills(
-                            row.getCells().get(1).asText(),  //fiscalId
+                            rfc + "-" + row.getCells().get(1).asText() + "-" +transformedDate,  //fiscalId
                             rfc,
                             row.getCells().get(2).asText(),  //emisorRFC
                             row.getCells().get(3).asText(),  //emisorName
