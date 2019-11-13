@@ -4,9 +4,7 @@ package com.mvii3iv.sat.crawler.components.bills;
 import org.springframework.data.annotation.Id;
 
 public class Bills {
-
-    @Id
-    private String fiscalId;
+    private String _id;
     private String userId;
     private String emisorRFC;
     private String emisorName;
@@ -24,19 +22,33 @@ public class Bills {
     private boolean emited;
     private boolean edited;
 
-
     @Override
-    public String toString(){
-        return String.format("Bills[fiscalId=%s, userId=%s, emisorRFC='%s', emisorName='%s', receiverRFC='%s', emitedDate='%s', certificationDate='%s', certifiedPAC='%s', total='%s', voucherEffect='%s', cancelationStatus='%s', voucherStatus='%s', cancelationProcessStatus='%s', cancelationProcessDate='%s', emited='%b', edited='%b']",
-                fiscalId, emisorRFC, emisorName, receiverRFC, receiverName, emitedDate, certificationDate, certifiedPAC, total, voucherEffect, cancelationStatus, voucherStatus, cancelationProcessStatus, cancelationProcessDate, emited, edited);
+    public String toString() {
+        return "Bills{" +
+                "_id='" + _id + '\'' +
+                ", userId='" + userId + '\'' +
+                ", emisorRFC='" + emisorRFC + '\'' +
+                ", emisorName='" + emisorName + '\'' +
+                ", receiverRFC='" + receiverRFC + '\'' +
+                ", receiverName='" + receiverName + '\'' +
+                ", emitedDate='" + emitedDate + '\'' +
+                ", certificationDate='" + certificationDate + '\'' +
+                ", certifiedPAC='" + certifiedPAC + '\'' +
+                ", total='" + total + '\'' +
+                ", voucherEffect='" + voucherEffect + '\'' +
+                ", cancelationStatus='" + cancelationStatus + '\'' +
+                ", voucherStatus='" + voucherStatus + '\'' +
+                ", cancelationProcessStatus='" + cancelationProcessStatus + '\'' +
+                ", cancelationProcessDate='" + cancelationProcessDate + '\'' +
+                ", emited=" + emited +
+                ", edited=" + edited +
+                '}';
     }
 
-    public Bills(){
-
+    public Bills() {
     }
 
-    public Bills(String fiscalId, String userId, String emisorRFC, String emisorName, String receiverRFC, String receiverName, String emitedDate, String certificationDate, String certifiedPAC, String total, String voucherEffect, String cancelationStatus, String voucherStatus, String cancelationProcessStatus, String cancelationProcessDate, boolean emited, boolean edited) {
-        this.fiscalId = fiscalId;
+    public Bills(String userId, String emisorRFC, String emisorName, String receiverRFC, String receiverName, String emitedDate, String certificationDate, String certifiedPAC, String total, String voucherEffect, String cancelationStatus, String voucherStatus, String cancelationProcessStatus, String cancelationProcessDate, boolean emited, boolean edited) {
         this.userId = userId;
         this.emisorRFC = emisorRFC;
         this.emisorName = emisorName;
@@ -55,12 +67,12 @@ public class Bills {
         this.edited = edited;
     }
 
-    public String getFiscalId() {
-        return fiscalId;
+    public String get_id() {
+        return _id;
     }
 
-    public void setFiscalId(String fiscalId) {
-        this.fiscalId = fiscalId;
+    public void set_id(String _id) {
+        this._id = _id;
     }
 
     public String getUserId() {

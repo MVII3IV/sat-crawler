@@ -24,6 +24,8 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Month;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,6 +44,7 @@ public class Browser {
         GORA870926A8A   13081308    Alexandra
         PACE380810SH6   Haciend9
         MIQE900707P41   MIQE9007
+        SSA161109CZ1    Rachel15
 
         count sat
         document.querySelector("#ctl00_MainContent_tblResult > tbody").childElementCount-1
@@ -83,6 +86,8 @@ public class Browser {
      * @return
      */
     public List<Bills> getUserData(WebClient webClient, String rfc) {
+        List<Bills> bills = billsRepository.findByUserId(rfc);
+        billsRepository.delete(bills);
         getReceivedBills(webClient, rfc);
         getEmittedBills(webClient, rfc);
         return billsRepository.findByUserId(rfc);
@@ -172,6 +177,18 @@ public class Browser {
         return webClient;
     }
 
+    private String getMonthByInt(int i) {
+        String month = "";
+        if (i == 10)
+            System.out.println();
+
+        if (i < 10)
+            month = "0" + i;
+        else
+            month = String.valueOf(i);
+        return month;
+    }
+
 
     /**
      * Extracts Emitted Bills from SAT
@@ -185,55 +202,148 @@ public class Browser {
         System.out.println("-----------------------------Extracting Emitted Bills-----------------------------------");
         System.out.println("----------------------------------------------------------------------------------------");
         HtmlTable table = null;
+        List<Bills> currentBillsSet = new ArrayList<>();
+        List<Bills> bills = new ArrayList<>();
+        String month = "";
+        String finalDate;
+
         int billsCount = 0;
         List incomes = new ArrayList<Bills>();
 
         try {
-            System.out.print(new Date() + " [INFO] - Loading sat emitted bill page:");
-            HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
-            browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaEmisor.aspx");
+
+
+            //month iteration to extract more than 500 bills
+            int monthLimit = Calendar.getInstance().get(Calendar.MONTH) + 1;
+            for(int i = 1 ; i < monthLimit + 1; i++) {
+
+
+                System.out.print(new Date() + " [INFO] - Loading sat emitted bill page:");
+                //HtmlPage browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
+                HtmlPage browser = webClient.getPage("https://portalcfdi.facturaelectronica.sat.gob.mx/ConsultaEmisor.aspx");
 
 
 
-            System.out.print(new Date() + " [INFO] - Selecting Date Range ");
-            browser.getHtmlElementById("ctl00_MainContent_RdoFechas").click();
-            ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFechaInicial2_Calendario_text")).setValueAttribute("01/01/" + Year.now().getValue());
-            ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFechaFinal2_Calendario_text")).setValueAttribute(new SimpleDateFormat("dd/MM/yyy").format(new Date()));
-            System.out.print(new Date() + " [INFO] - Getting data from 01/01/" + Year.now().getValue() + " to " + new SimpleDateFormat("dd/MM/yyy").format(new Date()));
-            browser = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_BtnBusqueda")).click();
+                System.out.print(new Date() + " [INFO] - Selecting Date Range ");
+                browser.getHtmlElementById("ctl00_MainContent_RdoFechas").click();
 
 
-            int counter = 0;
-            do {
-                webClient.waitForBackgroundJavaScript(1000 * counter++);
-                table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
+                if(i == monthLimit)
+                    finalDate = new SimpleDateFormat("dd/MM/yyy").format(new Date());
+                else
+                    finalDate = "01/" + getMonthByInt( i + 1 ) + "/" + Year.now().getValue();
 
-                if(counter > 6){
-                    System.out.println(new Date() + " [ERROR] - Javascript background time over exceeded");
-                    return null;
-                }
+                String initialDate = "01/" + getMonthByInt(i) + "/" + Year.now().getValue();
 
-                if (browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")) {
-                    System.out.println(new Date() + " [WARNING] - There is no information available");
-                    return null;
-                }
-            } while (table.getRows().size() <= 1);
+
+                ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFechaInicial2_Calendario_text")).setValueAttribute(initialDate);
+                ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFechaFinal2_Calendario_text")).setValueAttribute(finalDate);
+
+                /*
+                HtmlSelect hourSelectStart = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaInicial2_DdlHora");
+                HtmlOption hourOptionStart = hourSelectStart.getOptionByText("00");
+                hourSelectStart.setSelectedAttribute(hourOptionStart, true);
+
+                HtmlSelect minutesSelectStart = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaInicial2_DdlMinuto");
+                HtmlOption minutesOptionStart = minutesSelectStart.getOptionByText("00");
+                minutesSelectStart.setSelectedAttribute(minutesOptionStart, true);
+
+                HtmlSelect secondsSelectStart = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaInicial2_DdlSegundo");
+                HtmlOption secondsOptionStart = secondsSelectStart.getOptionByText("00");
+                secondsSelectStart.setSelectedAttribute(secondsOptionStart, true);
+
+                HtmlSelect hourSelectFinal = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaFinal2_DdlHora");
+                HtmlOption hourOptionFinal = hourSelectFinal.getOptionByText("23");
+                hourSelectFinal.setSelectedAttribute(hourOptionFinal, true);
+
+                HtmlSelect minutesSelectFinal = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaFinal2_DdlMinuto");
+                HtmlOption minutesOptionFinal = minutesSelectFinal.getOptionByText("59");
+                minutesSelectFinal.setSelectedAttribute(minutesOptionFinal, true);
+
+                HtmlSelect secondsSelectFinal = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaFinal2_DdlSegundo");
+                HtmlOption secondsOptionFinal = secondsSelectFinal.getOptionByText("59");
+                secondsSelectFinal.setSelectedAttribute(secondsOptionFinal, true);
+*/
+                /*
+
+                HtmlSelect monthSelect = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFecha_DdlMes");
+                    HtmlOption option = monthSelect.getOptionByText(month);
+                    monthSelect.setSelectedAttribute(option, true);
+
+                browser = selectOption(browser, "ctl00_MainContent_CldFechaInicial2_DdlHora", "0" );
+                browser = selectOption(browser, "ctl00_MainContent_CldFechaInicial2_DdlMinuto", "0" );
+                browser = selectOption(browser, "ctl00_MainContent_CldFechaInicial2_DdlSegundo", "0" );
+
+                browser = selectOption(browser, "ctl00_MainContent_CldFechaFinal2_DdlHora", "23" );
+                browser = selectOption(browser, "ctl00_MainContent_CldFechaFinal2_DdlMinuto", "59" );
+                browser = selectOption(browser, "ctl00_MainContent_CldFechaFinal2_DdlSegundo", "59" );
+
+                browser = setInputBox("ctl00_MainContent_CldFechaInicial2_Calendario_text", initialDate, browser, webClient);
+                browser = setInputBox("ctl00_MainContent_CldFechaFinal2_Calendario_text", finalDate, browser, webClient);*/
+
+                System.out.println(new Date() + " [INFO] - Getting data from " + initialDate  + " to " + finalDate);
+                browser = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_BtnBusqueda")).click();
+
+                int counter = 0;
+                boolean noData = false;
+                do {
+                    //verifyData(browser);
+                    //browser = setData(browser, webClient, initialDate, finalDate);
+                    verifyData(browser);
+
+
+                    webClient.waitForBackgroundJavaScript(1000 * counter++);
+                    table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
+
+                    if (counter > 6) {
+                        System.out.println(new Date() + " [ERROR] - Javascript background time over exceeded");
+                        return null;
+                    }
+
+                    if (browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")) {
+                        noData = true;
+                        System.out.println(new Date() + " [WARNING] - There is no information available");
+                        break;
+                    }
+                } while (table.getRows().size() <= 1);
+
+                if(noData)
+                    continue;
+
+                currentBillsSet = getBillsFromTable(table, rfc, true);
+
+                System.out.println("bills found on month " + getMonthByInt( i ) + " : " + currentBillsSet.size());
+
+                bills.addAll(currentBillsSet);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
-
-        List<Bills> bill = getBillsFromTable(table, rfc, true);
-        bill = billsRepository.save(bill);
-        billsCount += bill.size();
+        bills = billsRepository.save(bills);
+        billsCount += bills.size();
         billsRecordsRepository.save(new BillsRecords(rfc, true, billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));
         System.out.print(new Date() + " [INFO] - Emitted Bills Extracted Successfully, Emitted bills captured: " + billsCount);
 
         return webClient;
     }
 
+    private boolean verifyData(HtmlPage browser){
+        String startdate = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFechaInicial2_Calendario_text")).getValueAttribute();
+        String finalDate = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFechaFinal2_Calendario_text")).getValueAttribute();
+
+        int ho = ((HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaInicial2_DdlHora")).getSelectedIndex();
+        int mo = ((HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaInicial2_DdlMinuto")).getSelectedIndex();
+        int so = ((HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaInicial2_DdlSegundo")).getSelectedIndex();
+
+        int hf = ((HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaFinal2_DdlHora")).getSelectedIndex();
+        int mf = ((HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaFinal2_DdlMinuto")).getSelectedIndex();
+        int sf = ((HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaFinal2_DdlSegundo")).getSelectedIndex();
+        System.out.println();
+
+        return true;
+    }
 
     /**
      * Receives a table and decompiles to extract its data and form a Bill register
@@ -291,7 +401,7 @@ public class Browser {
 
             incomes.add(
                     new Bills(
-                            rfc + "-" + row.getCells().get(1).asText() + "-" +transformedDate,  //fiscalId
+                            //rfc + "-" + row.getCells().get(1).asText() + "-" +transformedDate + new Date().toString(),  //fiscalId
                             rfc,
                             row.getCells().get(2).asText(),  //emisorRFC
                             row.getCells().get(3).asText(),  //emisorName
@@ -465,18 +575,15 @@ public class Browser {
         if(hostValidator.isProxyRequired()){
             webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER, "proxy.autozone.com", 8080);
             DefaultCredentialsProvider credentialsProvider = (DefaultCredentialsProvider) webClient.getCredentialsProvider();
-            credentialsProvider.addCredentials("edomingu", "SDFrew234@");
+            credentialsProvider.addCredentials("edomingu", "asdEWQ123!");
         } else {
             webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER);
         }
 
-        //LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+        LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
         java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
         java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
-        java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 
-        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-        webClient.getOptions().setPrintContentOnFailingStatusCode(false);
         webClient.getOptions().setUseInsecureSSL(true);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
         webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
@@ -509,6 +616,7 @@ public class Browser {
 
             }
         });
+
         webClient.setHTMLParserListener(new HTMLParserListener() {
 
             @Override
@@ -522,12 +630,6 @@ public class Browser {
             }
         });
 
-
-
-
         return webClient;
-        //CookieManager cookieMan = new CookieManager();
-        //cookieMan = browser.getCookieManager();
-        //cookieMan.setCookiesEnabled(true);
     }
 }

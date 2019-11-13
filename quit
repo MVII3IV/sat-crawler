@@ -1,0 +1,62 @@
+[33mtag 0.1.0[m
+Tagger: MVII3IV <afrosclothing@hotmail.com>
+Date:   Tue Nov 12 19:18:58 2019 -0700
+
+Working version
+
+[33mcommit af213895380e2971421d3078bfd5bdb277d78798[m[33m ([m[1;36mHEAD -> [m[1;32mdev[m[33m, [m[1;33mtag: 0.1.0[m[33m, [m[1;31morigin/dev[m[33m)[m
+Author: MVII3IV <afrosclothing@hotmail.com>
+Date:   Wed Oct 9 23:27:37 2019 -0600
+
+    id for bills has changed due possible duplicity
+
+[1mdiff --git a/src/main/java/com/mvii3iv/sat/crawler/components/browser/Browser.java b/src/main/java/com/mvii3iv/sat/crawler/components/browser/Browser.java[m
+[1mindex 539e004..ae00bd9 100644[m
+[1m--- a/src/main/java/com/mvii3iv/sat/crawler/components/browser/Browser.java[m
+[1m+++ b/src/main/java/com/mvii3iv/sat/crawler/components/browser/Browser.java[m
+[36m@@ -44,7 +44,7 @@[m [mpublic class Browser {[m
+         MIQE900707P41   MIQE9007[m
+ [m
+         count sat[m
+[31m-        document.querySelector("#ctl00_MainContent_tblResult > tbody").childElementCount[m
+[32m+[m[32m        document.querySelector("#ctl00_MainContent_tblResult > tbody").childElementCount-1[m
+      */[m
+ [m
+ [m
+[36m@@ -157,13 +157,13 @@[m [mpublic class Browser {[m
+                         continue;[m
+ [m
+                     List<Bills> bill = getBillsFromTable(table, rfc, false);[m
+[31m-                    billsRepository.save(bill);[m
+[32m+[m[32m                    bill = billsRepository.save(bill);[m
+                     billsCount += bill.size();[m
+                     System.out.println(new Date() + " [INFO] - Extraction complete for month: " + month + ", total of bills: " + bill.size());[m
+                 }[m
+ [m
+             System.out.println(new Date() + "[INFO] - All extraction is complete, Received bills captured: " + billsCount);[m
+[31m-            billsRecordsRepository.save(new BillsRecords(rfc, false, ++billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));[m
+[32m+[m[32m            billsRecordsRepository.save(new BillsRecords(rfc, false, billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));[m
+ [m
+         } catch (IOException e) {[m
+             e.printStackTrace();[m
+[36m@@ -226,9 +226,9 @@[m [mpublic class Browser {[m
+ [m
+ [m
+         List<Bills> bill = getBillsFromTable(table, rfc, true);[m
+[31m-        billsRepository.save(bill);[m
+[32m+[m[32m        bill = billsRepository.save(bill);[m
+         billsCount += bill.size();[m
+[31m-        billsRecordsRepository.save(new BillsRecords(rfc, false, ++billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));[m
+[32m+[m[32m        billsRecordsRepository.save(new BillsRecords(rfc, true, billsCount, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()) ));[m
+         System.out.print(new Date() + " [INFO] - Emitted Bills Extracted Successfully, Emitted bills captured: " + billsCount);[m
+ [m
+         return webClient;[m
+[36m@@ -291,7 +291,7 @@[m [mpublic class Browser {[m
+ [m
+             incomes.add([m
+                     new Bills([m
+[31m-                            row.getCells().get(1).asText(),  //fiscalId[m
+[32m+[m[32m                            rfc + "-" + row.getCells().get(1).asText() + "-" +transformedDate,  //fiscalId[m
+                             rfc,[m
+                             row.getCells().get(2).asText(),  //emisorRFC[m
+                             row.getCells().get(3).asText(),  //emisorName[m

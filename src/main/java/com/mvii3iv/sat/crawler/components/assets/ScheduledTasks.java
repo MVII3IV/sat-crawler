@@ -32,7 +32,7 @@ public class ScheduledTasks {
      * and extracts information from all Customers
      */
     //                 s  m h  d m a
-    @Scheduled(cron = "0 0 6 * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     public void scheduleTaskWithFixedRate() {
         logger.info("Extraction Task Started - ", dateTimeFormatter.format(LocalDateTime.now()) );
         billsService.extractAllCustomersDataFromSat();

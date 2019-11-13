@@ -59,9 +59,11 @@ public class BillsController {
             //looks if the customer is already on the database, if it doesn't then it is added to customers
             customersService.validateCustomer(rfc, pass);
 
-            List<Bills> bills = billsService.getBillsByRFC(rfc);
+            if(extract)
+                return billsService.extractDataByUserFromSat(rfc, pass);
 
-            if(bills.size() > 0 && extract != true )
+            List<Bills> bills = billsService.getBillsByRFC(rfc);
+            if(bills.size() > 0 )
                 return bills;
             else
                 return billsService.extractDataByUserFromSat(rfc, pass);
