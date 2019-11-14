@@ -239,7 +239,7 @@ public class Browser {
                 ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFechaInicial2_Calendario_text")).setValueAttribute(initialDate);
                 ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_CldFechaFinal2_Calendario_text")).setValueAttribute(finalDate);
 
-                /*
+
                 HtmlSelect hourSelectStart = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaInicial2_DdlHora");
                 HtmlOption hourOptionStart = hourSelectStart.getOptionByText("00");
                 hourSelectStart.setSelectedAttribute(hourOptionStart, true);
@@ -263,23 +263,7 @@ public class Browser {
                 HtmlSelect secondsSelectFinal = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFechaFinal2_DdlSegundo");
                 HtmlOption secondsOptionFinal = secondsSelectFinal.getOptionByText("59");
                 secondsSelectFinal.setSelectedAttribute(secondsOptionFinal, true);
-*/
-                /*
 
-                HtmlSelect monthSelect = (HtmlSelect) browser.getElementById("ctl00_MainContent_CldFecha_DdlMes");
-                    HtmlOption option = monthSelect.getOptionByText(month);
-                    monthSelect.setSelectedAttribute(option, true);
-
-                browser = selectOption(browser, "ctl00_MainContent_CldFechaInicial2_DdlHora", "0" );
-                browser = selectOption(browser, "ctl00_MainContent_CldFechaInicial2_DdlMinuto", "0" );
-                browser = selectOption(browser, "ctl00_MainContent_CldFechaInicial2_DdlSegundo", "0" );
-
-                browser = selectOption(browser, "ctl00_MainContent_CldFechaFinal2_DdlHora", "23" );
-                browser = selectOption(browser, "ctl00_MainContent_CldFechaFinal2_DdlMinuto", "59" );
-                browser = selectOption(browser, "ctl00_MainContent_CldFechaFinal2_DdlSegundo", "59" );
-
-                browser = setInputBox("ctl00_MainContent_CldFechaInicial2_Calendario_text", initialDate, browser, webClient);
-                browser = setInputBox("ctl00_MainContent_CldFechaFinal2_Calendario_text", finalDate, browser, webClient);*/
 
                 System.out.println(new Date() + " [INFO] - Getting data from " + initialDate  + " to " + finalDate);
                 browser = ((HtmlInput) browser.getHtmlElementById("ctl00_MainContent_BtnBusqueda")).click();
@@ -288,10 +272,6 @@ public class Browser {
                 boolean noData = false;
                 do {
                     //verifyData(browser);
-                    //browser = setData(browser, webClient, initialDate, finalDate);
-                    verifyData(browser);
-
-
                     webClient.waitForBackgroundJavaScript(1000 * counter++);
                     table = browser.getHtmlElementById("ctl00_MainContent_tblResult");
 
@@ -434,14 +414,25 @@ public class Browser {
      */
     public WebClient login(String rfc, String pass) {
 
-        WebClient webClient = init();
+        WebClient webClient = new WebClient();
         boolean hasError = false;
         int count = 0;
 
         do {
+            webClient = init();
             try {
+
                 webClient = openLoginURL(webClient, rfc, pass);
-                webClient = getMainPage(webClient);
+
+                if(webClient == null){
+                    hasError = true;
+                    System.out.println("Error while login trying again, try number: " + count++);
+                    if(count > 5)
+                        break;
+                }else{
+                    webClient = getMainPage(webClient);
+                }
+
             } catch (Exception e) {
                 hasError = true;
                 System.out.println("Error while login trying again, try number: " + count++);
@@ -497,7 +488,6 @@ public class Browser {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
 
             if (timeMultiplier > 5) {
                 System.out.println("--->login form could be found after " + timeMultiplier + " tries");
