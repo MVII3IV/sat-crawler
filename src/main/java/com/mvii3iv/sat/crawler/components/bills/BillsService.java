@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -62,7 +63,13 @@ public class BillsService {
      */
     public List<Bills> extractDataByUserFromSat(String rfc, String pass) {
         WebClient webClient = browser.login(rfc, pass);
-        return browser.getUserData(webClient, rfc);
+
+        if(webClient != null){
+            return browser.getUserData(webClient, rfc);
+        }else{
+            System.out.print(new Date() + " [ERROR] Could login to the site");
+            return null;
+        }
     }
 
     /**

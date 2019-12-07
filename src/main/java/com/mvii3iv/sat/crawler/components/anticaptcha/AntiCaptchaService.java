@@ -21,7 +21,7 @@ public class AntiCaptchaService {
     /**
      * Global and constant variables
      */
-    private final String CLIENT_kEY = "d2e3cdd426d740b83ee2bd655067412e";
+    private final String CLIENT_kEY = "3e4a0c91454580060cc45e07debbcc49";
     private final String TASK_RESULT_URL = "https://api.anti-captcha.com/getTaskResult";
     private final String CREATE_TASK_URL = "https://api.anti-captcha.com/createTask";
 

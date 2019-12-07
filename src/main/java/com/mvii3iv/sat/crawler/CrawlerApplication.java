@@ -17,6 +17,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class CrawlerApplication extends SpringBootServletInitializer {
 
+	public CrawlerApplication(){
+		setRegisterErrorPageFilter(false);
+	}
+
 	public static void main(String[] args) {
 		System.out.println("Version Verification");
 		SpringApplication.run(CrawlerApplication.class, args);

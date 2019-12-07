@@ -86,6 +86,12 @@ public class Browser {
      * @return
      */
     public List<Bills> getUserData(WebClient webClient, String rfc) {
+
+        if(webClient == null) {
+            System.out.println(new Date() +  " [ERROR] - Webclient was null for user " + rfc);
+            return null;
+        }
+
         List<Bills> bills = billsRepository.findByUserId(rfc);
         billsRepository.delete(bills);
         getReceivedBills(webClient, rfc);
@@ -119,10 +125,7 @@ public class Browser {
             browser.getHtmlElementById("ctl00_MainContent_RdoFechas").click();
 
 
-            for (int i = 1; i < (Calendar.getInstance().get(Calendar.MONTH) + 2) + 1; i++) {
-
-                if(i == 10)
-                    System.out.println();
+            for (int i = 1; i <= Calendar.getInstance().get(Calendar.MONTH) + 1 ; i++) {
 
                 if (i < 10)
                     month = "0" + i;
@@ -148,8 +151,8 @@ public class Browser {
                             break;
                         }
 
-                        if (count > 6){
-                            System.out.println(new Date() + " [ERROR] - I have tried more than 6 times to extract information, skipping month: " + month);
+                        if (count > 5){
+                            System.out.println(new Date() + " [ERROR] - I have tried 5 times to extract information, skipping month: " + month);
                             break;
                         }
 
@@ -212,8 +215,6 @@ public class Browser {
 
         try {
 
-
-            //month iteration to extract more than 500 bills
             int monthLimit = Calendar.getInstance().get(Calendar.MONTH) + 1;
             for(int i = 1 ; i < monthLimit + 1; i++) {
 
@@ -277,7 +278,8 @@ public class Browser {
 
                     if (counter > 6) {
                         System.out.println(new Date() + " [ERROR] - Javascript background time over exceeded");
-                        return null;
+                        noData = true;
+                        break;
                     }
 
                     if (browser.getHtmlElementById("ctl00_MainContent_PnlNoResultados").getAttribute("style").contains("display:inline")) {
@@ -415,34 +417,31 @@ public class Browser {
     public WebClient login(String rfc, String pass) {
 
         WebClient webClient = new WebClient();
-        boolean hasError = false;
-        int count = 0;
+        //boolean hasError = false;
+        //int count = 0;
 
-        do {
+        //do {
             webClient = init();
             try {
 
                 webClient = openLoginURL(webClient, rfc, pass);
 
                 if(webClient == null){
-                    hasError = true;
-                    System.out.println("Error while login trying again, try number: " + count++);
-                    if(count > 5)
-                        break;
+                    //hasError = true;
+                    //System.out.println("Error while login trying again, Webclient is null, try number: " + count++);
+                    //if(count > 5)
+                        //break;
                 }else{
                     webClient = getMainPage(webClient);
                 }
 
             } catch (Exception e) {
-                hasError = true;
-                System.out.println("Error while login trying again, try number: " + count++);
-                if(count > 5)
-                    break;
+                //hasError = true;
+                System.out.println(e.getMessage());
+                //if(count > 5)
+                    //break;
             }
-        }while(hasError);
-
-
-
+        //}while(hasError);
 
         return webClient;
     }
@@ -463,13 +462,13 @@ public class Browser {
                 System.out.println("--->login form could be found, try:" + timeMultiplier);
 
             try {
+                webClient.waitForBackgroundJavaScript(1000 * ++timeMultiplier);
                 browser = webClient.getPage(LOGIN_URL);
 
                 image = browser.<HtmlImage>getFirstByXPath("//*[@id='IDPLogin']/div[3]/label/img");
-                webClient.waitForBackgroundJavaScript(1000 * ++timeMultiplier);
+
                 captchaService.saveCaptcha(image, RFC);
                 browser = (HtmlPage) webClient.getCurrentWindow().getEnclosedPage();
-
                 HtmlForm loginForm = browser.getFormByName("IDPLogin");
                 HtmlInput rfc = loginForm.getInputByName("Ecom_User_ID");
                 HtmlPasswordInput pass = loginForm.getInputByName("Ecom_Password");
